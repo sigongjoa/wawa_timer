@@ -1,0 +1,8 @@
+{
+  "apiKey": "YOUR_NOTION_API_KEY_HERE",
+  "databases": {
+    "students": "YOUR_STUDENTS_DATABASE_ID",
+    "attendance": "YOUR_ATTENDANCE_DATABASE_ID",
+    "pdfs": "YOUR_PDFS_DATABASE_ID"
+  }
+}

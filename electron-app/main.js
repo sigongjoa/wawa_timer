@@ -1,6 +1,9 @@
+require('dotenv').config();
 const { app, BrowserWindow, ipcMain, dialog, shell } = require('electron');
 const path = require('path');
 const fs = require('fs');
+const notion = require('./notion');
+const ai = require('./ai');
 
 let mainWindow;
 
@@ -322,4 +325,119 @@ ipcMain.handle('load-attendance', async (event, date) => {
         console.error('출석 로드 오류:', error);
         return null;
     }
+});
+
+// ===== Notion API 핸들러 =====
+
+// Notion 설정 가져오기
+ipcMain.handle('notion-get-config', async () => {
+    return notion.getConfig();
+});
+
+// Notion 설정 저장
+ipcMain.handle('notion-save-config', async (event, config) => {
+    return notion.saveConfig(config);
+});
+
+// Notion 연결 테스트
+ipcMain.handle('notion-test-connection', async () => {
+    return await notion.testConnection();
+});
+
+// 데이터베이스 구조 가져오기
+ipcMain.handle('notion-get-db-schema', async (event, databaseId) => {
+    return await notion.getDatabaseSchema(databaseId);
+});
+
+// 학생 목록 가져오기 (Notion -> 앱)
+ipcMain.handle('notion-get-students', async () => {
+    return await notion.getStudentsFromNotion();
+});
+
+// 학생 추가 (앱 -> Notion)
+ipcMain.handle('notion-add-student', async (event, student) => {
+    return await notion.addStudentToNotion(student);
+});
+
+// 학생 수정 (앱 -> Notion)
+ipcMain.handle('notion-update-student', async (event, { notionId, student }) => {
+    return await notion.updateStudentInNotion(notionId, student);
+});
+
+// 학생 삭제 (앱 -> Notion)
+ipcMain.handle('notion-delete-student', async (event, notionId) => {
+    return await notion.deleteStudentFromNotion(notionId);
+});
+
+// 출석 기록 추가 (앱 -> Notion)
+ipcMain.handle('notion-add-attendance', async (event, record) => {
+    return await notion.addAttendanceToNotion(record);
+});
+
+// 출석 기록 가져오기 (Notion -> 앱)
+ipcMain.handle('notion-get-attendance', async (event, date) => {
+    return await notion.getAttendanceFromNotion(date);
+});
+
+// ===== PDF 관련 Notion API =====
+
+// PDF 목록 가져오기 (Notion -> 앱)
+ipcMain.handle('notion-get-pdfs', async (event, studentName) => {
+    return await notion.getPdfsFromNotion(studentName);
+});
+
+// PDF 추가 (앱 -> Notion)
+ipcMain.handle('notion-add-pdf', async (event, pdf) => {
+    return await notion.addPdfToNotion(pdf);
+});
+
+// PDF 수정 (앱 -> Notion)
+ipcMain.handle('notion-update-pdf', async (event, { notionId, pdf }) => {
+    return await notion.updatePdfInNotion(notionId, pdf);
+});
+
+// PDF 삭제 (앱 -> Notion)
+ipcMain.handle('notion-delete-pdf', async (event, notionId) => {
+    return await notion.deletePdfFromNotion(notionId);
+});
+
+// PDF 메타데이터를 Notion에 저장
+ipcMain.handle('notion-sync-pdfs', async (event, { studentName, files }) => {
+    return await notion.syncPdfMetadataToNotion(studentName, files);
+});
+
+// ===== AI 비서 관련 =====
+
+// AI 설정 확인
+ipcMain.handle('ai-get-config', async () => {
+    return ai.getConfig();
+});
+
+// AI 연결 테스트
+ipcMain.handle('ai-test', async () => {
+    return await ai.testConnection();
+});
+
+// AI 채팅
+ipcMain.handle('ai-chat', async (event, { message, context }) => {
+    return await ai.chat(message, context);
+});
+
+// PDF 분석
+ipcMain.handle('ai-analyze-pdf', async (event, { pdfPath, question, context }) => {
+    // 상대 경로를 절대 경로로 변환
+    const assetsPath = getAssetsPath();
+    const fullPath = path.join(assetsPath, pdfPath);
+    return await ai.analyzePdf(fullPath, question, context);
+});
+
+// 대화 히스토리 초기화
+ipcMain.handle('ai-clear-history', async () => {
+    ai.clearHistory();
+    return { success: true };
+});
+
+// 대화 히스토리 조회
+ipcMain.handle('ai-get-history', async () => {
+    return { success: true, history: ai.getHistory() };
 });

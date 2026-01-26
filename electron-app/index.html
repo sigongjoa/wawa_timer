@@ -800,6 +800,8 @@
         <div class="header-buttons">
             <button class="btn btn-success" onclick="openAddModal()">+ 학생 추가</button>
             <button class="btn btn-primary" onclick="saveAllData()">💾 저장</button>
+            <button class="btn" onclick="openNotionSettingsModal()" id="notionBtn" style="background:#444;color:white;">☁️ Notion</button>
+            <button class="btn" onclick="openAiChat()" id="aiBtn" style="background:#8e44ad;color:white;">🤖 AI 비서</button>
         </div>
     </div>
 
@@ -931,7 +933,10 @@
                 <div class="pdf-section">
                     <div class="pdf-section-header">
                         <h4>PDF 자료 업로드</h4>
-                        <button type="button" class="btn btn-primary btn-sm" onclick="selectAndUploadPdf()">+ PDF 추가</button>
+                        <div style="display:flex;gap:8px;">
+                            <button type="button" class="btn btn-primary btn-sm" onclick="selectAndUploadPdf()">+ PDF 추가</button>
+                            <button type="button" class="btn btn-secondary btn-sm" onclick="syncPdfsToNotion()" title="로컬 PDF를 Notion에 동기화">☁️ Notion 동기화</button>
+                        </div>
                     </div>
                     <div class="pdf-list" id="pdfList">
                         <div class="no-pdf">폴더를 선택하면 PDF 목록이 표시됩니다</div>
@@ -986,6 +991,122 @@
             </div>
         </div>
     </div>
+
+    <!-- Notion 설정 모달 -->
+    <div class="modal" id="notionModal">
+        <div class="modal-content" style="max-width:550px">
+            <div class="modal-header">
+                <h2>☁️ Notion 연동 설정</h2>
+                <button class="modal-close" onclick="closeNotionModal()">&times;</button>
+            </div>
+            <div id="notionStatus" style="padding:10px;border-radius:8px;margin-bottom:15px;background:#f8f9fa;">
+                연결 상태 확인 중...
+            </div>
+            <div class="form-group">
+                <label>Notion API 키 *</label>
+                <input type="password" id="notionApiKey" placeholder="secret_xxxxxxxx...">
+                <small style="color:#888;">Notion Integration에서 발급받은 API 키</small>
+            </div>
+            <div class="form-group">
+                <label>학생 DB ID *</label>
+                <input type="text" id="notionStudentsDb" placeholder="32자리 ID 또는 Notion URL">
+                <small style="color:#888;">학생 시간표 데이터베이스</small>
+            </div>
+            <div class="form-group">
+                <label>출석 DB ID</label>
+                <input type="text" id="notionAttendanceDb" placeholder="32자리 ID 또는 Notion URL">
+                <small style="color:#888;">출석 기록 데이터베이스 (선택)</small>
+            </div>
+            <div class="form-group">
+                <label>PDF 자료 DB ID</label>
+                <input type="text" id="notionPdfsDb" placeholder="32자리 ID 또는 Notion URL">
+                <small style="color:#888;">PDF 자료 메타데이터 데이터베이스 (선택)</small>
+            </div>
+            <div class="form-actions" style="flex-wrap:wrap;gap:10px;">
+                <button class="btn btn-secondary" onclick="testNotionConnection()">연결 테스트</button>
+                <button class="btn btn-primary" onclick="syncFromNotion()">Notion에서 가져오기</button>
+                <button class="btn btn-success" onclick="saveNotionSettings()">설정 저장</button>
+            </div>
+            <hr style="margin:20px 0;border:none;border-top:1px solid #eee;">
+            <div style="font-size:13px;color:#666;">
+                <strong>Notion 데이터베이스 필수 속성:</strong>
+                <ul style="margin:10px 0 0 20px;">
+                    <li><strong>학생 DB:</strong> 이름(title), 학년(select), 요일(select), 시작시간(text), 종료시간(text), 과목(select), 비고(text)</li>
+                    <li><strong>출석 DB:</strong> 이름(title), 학년(select), 날짜(date), 체크인(text), 체크아웃(text), 수업시간(number)</li>
+                    <li><strong>PDF DB:</strong> 파일명(title), 학생이름(text), 과목(select), 메모(text)</li>
+                </ul>
+                <p style="margin-top:10px;color:#e67e22;">※ PDF 파일은 Notion에서 직접 첨부하세요 (무제한 저장)</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- AI 비서 모달 -->
+    <div class="modal" id="aiModal">
+        <div class="modal-content" style="max-width:650px;height:85vh;display:flex;flex-direction:column;">
+            <div class="modal-header">
+                <h2>🤖 매쓰봇 AI 비서</h2>
+                <button class="close-btn" onclick="closeAiModal()">&times;</button>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+                <div id="aiStatus" style="padding:8px 12px;font-size:12px;background:#f8f9fa;border-radius:4px;flex:1;">
+                    연결 상태 확인 중...
+                </div>
+                <button class="btn btn-secondary btn-sm" onclick="clearAiChat()" style="margin-left:10px;font-size:12px;">🗑️ 대화 초기화</button>
+            </div>
+            <div id="aiChatMessages" style="flex:1;overflow-y:auto;padding:10px;background:#f5f5f5;border-radius:8px;margin-bottom:10px;">
+                <div class="ai-message ai-assistant">
+                    안녕하세요! 학원 관리를 도와드리는 <b>매쓰봇</b>입니다. 🎓<br><br>
+                    <b>질문 예시:</b><br>
+                    📅 "오늘 수업 일정 알려줘"<br>
+                    👨‍🎓 "중2 학생 목록 보여줘"<br>
+                    📝 "홍길동 학생 정보 알려줘"<br>
+                    📊 "이번 주 요약해줘"<br><br>
+                    <span style="color:#888;font-size:12px;">💡 이전 대화를 기억하고, 필요한 정보만 찾아서 답변해요!</span>
+                </div>
+            </div>
+            <div style="display:flex;gap:8px;">
+                <input type="text" id="aiInput" placeholder="질문을 입력하세요... (예: 오늘 누가 와?)" style="flex:1;padding:12px;border:1px solid #ddd;border-radius:8px;font-size:14px;" onkeypress="if(event.key==='Enter')sendAiMessage()">
+                <button class="btn btn-primary" onclick="sendAiMessage()" style="padding:12px 20px;">전송</button>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        /* AI 채팅 스타일 */
+        #aiChatMessages {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .ai-message {
+            padding: 10px 14px;
+            border-radius: 12px;
+            max-width: 85%;
+            line-height: 1.5;
+            font-size: 14px;
+        }
+        .ai-user {
+            background: #3498db;
+            color: white;
+            align-self: flex-end;
+            border-bottom-right-radius: 4px;
+        }
+        .ai-assistant {
+            background: white;
+            color: #333;
+            align-self: flex-start;
+            border-bottom-left-radius: 4px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .ai-loading {
+            background: #f0f0f0;
+            color: #888;
+            align-self: flex-start;
+        }
+        #aiModal .modal-content {
+            padding: 20px;
+        }
+    </style>
 
     <!-- Toast -->
     <div class="toast" id="toast"></div>
@@ -1306,8 +1427,11 @@
             }
             todayAttendance.records.push(record);
 
-            // 출석 데이터 저장
+            // 출석 데이터 저장 (로컬)
             await saveAttendanceData();
+
+            // Notion에 출석 기록 동기화
+            await syncAttendanceToNotion(record);
 
             // 세션에서 제거
             activeSessions.splice(sessionIndex, 1);
@@ -2073,6 +2197,75 @@
             }
         }
 
+        // PDF 메타데이터를 Notion에 동기화
+        async function syncPdfsToNotion() {
+            if (!notionConnected) {
+                showToast('먼저 Notion에 연결하세요.', true);
+                return;
+            }
+
+            const folderName = document.getElementById('formLocalFolder').value;
+            const studentName = document.getElementById('formName').value.trim();
+            const subject = document.getElementById('formSubject').value;
+
+            if (!folderName) {
+                showToast('먼저 폴더를 선택하세요.', true);
+                return;
+            }
+
+            // PDF DB 설정 확인
+            const config = await window.electronAPI.notionGetConfig();
+            if (!config?.databases?.pdfs) {
+                showToast('Notion 설정에서 PDF DB ID를 먼저 설정하세요.', true);
+                return;
+            }
+
+            // 로컬 파일 목록 가져오기
+            const files = await window.electronAPI.getStudentFiles(folderName);
+            const localFiles = flattenFileTree(files);
+
+            if (localFiles.length === 0) {
+                showToast('동기화할 PDF 파일이 없습니다.', true);
+                return;
+            }
+
+            showToast(`${localFiles.length}개 파일 메타데이터를 Notion에 저장 중...`);
+
+            // 과목 정보 추가
+            const filesWithSubject = localFiles.map(f => ({
+                ...f,
+                subject: subject
+            }));
+
+            // Notion에 메타데이터 저장
+            const result = await window.electronAPI.notionSyncPdfs({
+                studentName: studentName || folderName,
+                files: filesWithSubject
+            });
+
+            if (result.success) {
+                showToast(`${result.added}개 파일 메타데이터가 Notion에 저장되었습니다. Notion에서 PDF를 직접 첨부하세요!`);
+            } else {
+                showToast('Notion 저장 실패: ' + result.error, true);
+            }
+        }
+
+        // 파일 트리를 평탄화하여 파일 목록만 추출
+        function flattenFileTree(items, basePath = '') {
+            let files = [];
+            for (const item of items) {
+                if (item.type === 'file') {
+                    files.push({
+                        fileName: item.name,
+                        localPath: item.path
+                    });
+                } else if (item.type === 'folder') {
+                    files = files.concat(flattenFileTree(item.children, item.path));
+                }
+            }
+            return files;
+        }
+
         // 폴더 선택 변경 시 PDF 목록 갱신
         document.getElementById('formLocalFolder').addEventListener('change', (e) => {
             loadPdfList(e.target.value);
@@ -2124,8 +2317,322 @@
             });
         });
 
+        // ===== Notion 연동 기능 =====
+
+        let notionConnected = false;
+
+        // Notion 설정 모달 열기
+        async function openNotionSettingsModal() {
+            document.getElementById('notionModal').classList.add('show');
+
+            // 저장된 설정 불러오기
+            const config = await window.electronAPI.notionGetConfig();
+            if (config) {
+                document.getElementById('notionApiKey').value = config.apiKey || '';
+                document.getElementById('notionStudentsDb').value = config.databases?.students || '';
+                document.getElementById('notionAttendanceDb').value = config.databases?.attendance || '';
+                document.getElementById('notionPdfsDb').value = config.databases?.pdfs || '';
+            }
+
+            // 연결 상태 확인
+            await checkNotionStatus();
+        }
+
+        // Notion 모달 닫기
+        function closeNotionModal() {
+            document.getElementById('notionModal').classList.remove('show');
+        }
+
+        // Notion 연결 상태 확인
+        async function checkNotionStatus() {
+            const statusEl = document.getElementById('notionStatus');
+            statusEl.innerHTML = '연결 상태 확인 중...';
+            statusEl.style.background = '#f8f9fa';
+
+            const result = await window.electronAPI.notionTestConnection();
+            if (result.success) {
+                statusEl.innerHTML = `✅ 연결됨: ${result.user}`;
+                statusEl.style.background = '#d4edda';
+                notionConnected = true;
+                updateNotionButton(true);
+            } else {
+                statusEl.innerHTML = `❌ 연결 안됨: ${result.error}`;
+                statusEl.style.background = '#f8d7da';
+                notionConnected = false;
+                updateNotionButton(false);
+            }
+        }
+
+        // Notion 버튼 상태 업데이트
+        function updateNotionButton(connected) {
+            const btn = document.getElementById('notionBtn');
+            if (connected) {
+                btn.style.background = '#27ae60';
+                btn.textContent = '☁️ Notion ✓';
+            } else {
+                btn.style.background = '#444';
+                btn.textContent = '☁️ Notion';
+            }
+        }
+
+        // Notion 연결 테스트
+        async function testNotionConnection() {
+            // 먼저 설정 저장
+            await saveNotionSettingsQuiet();
+            await checkNotionStatus();
+        }
+
+        // Notion 설정 저장 (조용히)
+        async function saveNotionSettingsQuiet() {
+            const apiKey = document.getElementById('notionApiKey').value.trim();
+            const studentsDb = extractDatabaseId(document.getElementById('notionStudentsDb').value.trim());
+            const attendanceDb = extractDatabaseId(document.getElementById('notionAttendanceDb').value.trim());
+            const pdfsDb = extractDatabaseId(document.getElementById('notionPdfsDb').value.trim());
+
+            await window.electronAPI.notionSaveConfig({
+                apiKey,
+                databases: {
+                    students: studentsDb,
+                    attendance: attendanceDb,
+                    pdfs: pdfsDb
+                }
+            });
+        }
+
+        // Notion 설정 저장
+        async function saveNotionSettings() {
+            await saveNotionSettingsQuiet();
+            showToast('설정이 저장되었습니다.');
+            await checkNotionStatus();
+        }
+
+        // URL에서 데이터베이스 ID 추출
+        function extractDatabaseId(input) {
+            if (!input) return '';
+
+            // 이미 32자리 ID면 그대로 반환
+            if (/^[a-f0-9]{32}$/i.test(input.replace(/-/g, ''))) {
+                return input.replace(/-/g, '');
+            }
+
+            // URL에서 ID 추출
+            const match = input.match(/([a-f0-9]{32})/i);
+            if (match) return match[1];
+
+            // 하이픈 포함된 형식
+            const match2 = input.match(/([a-f0-9-]{36})/i);
+            if (match2) return match2[1].replace(/-/g, '');
+
+            return input;
+        }
+
+        // Notion에서 학생 데이터 가져오기
+        async function syncFromNotion() {
+            showToast('Notion에서 데이터를 가져오는 중...');
+
+            const result = await window.electronAPI.notionGetStudents();
+            if (result.success) {
+                if (result.students.length === 0) {
+                    showToast('Notion에 학생 데이터가 없습니다.', true);
+                    return;
+                }
+
+                // 기존 데이터와 병합할지 확인
+                if (students.length > 0) {
+                    if (!confirm(`현재 ${students.length}명의 학생 데이터가 있습니다.\nNotion에서 가져온 ${result.students.length}명의 데이터로 대체하시겠습니까?`)) {
+                        return;
+                    }
+                }
+
+                students = result.students;
+                render();
+                showToast(`Notion에서 ${result.students.length}명의 학생 데이터를 가져왔습니다.`);
+            } else {
+                showToast('Notion 동기화 실패: ' + result.error, true);
+            }
+        }
+
+        // 체크아웃 시 Notion에 출석 기록 추가
+        async function syncAttendanceToNotion(record) {
+            if (!notionConnected) return;
+
+            const config = await window.electronAPI.notionGetConfig();
+            if (!config.databases?.attendance) return;
+
+            const result = await window.electronAPI.notionAddAttendance({
+                ...record,
+                date: getTodayDateString()
+            });
+
+            if (result.success) {
+                console.log('Notion 출석 기록 추가 완료');
+            } else {
+                console.error('Notion 출석 기록 실패:', result.error);
+            }
+        }
+
+        // 앱 시작 시 Notion 연결 확인
+        async function initNotion() {
+            const config = await window.electronAPI.notionGetConfig();
+            if (config && config.apiKey) {
+                const result = await window.electronAPI.notionTestConnection();
+                notionConnected = result.success;
+                updateNotionButton(result.success);
+            }
+        }
+
+        // ===== Notion 연동 기능 끝 =====
+
+        // ===== AI 비서 기능 =====
+
+        let aiConnected = false;
+
+        // AI 모달 열기
+        async function openAiChat() {
+            document.getElementById('aiModal').classList.add('show');
+            await checkAiStatus();
+        }
+
+        // AI 모달 닫기
+        function closeAiModal() {
+            document.getElementById('aiModal').classList.remove('show');
+        }
+
+        // AI 연결 상태 확인
+        async function checkAiStatus() {
+            const statusEl = document.getElementById('aiStatus');
+            statusEl.innerHTML = '연결 상태 확인 중...';
+            statusEl.style.background = '#f8f9fa';
+            statusEl.style.color = '#666';
+
+            const config = await window.electronAPI.aiGetConfig();
+
+            if (!config.hasAnthropicKey && !config.hasOpenaiKey && !config.hasGoogleKey) {
+                statusEl.innerHTML = '⚠️ API 키가 설정되지 않았습니다. .env 파일을 확인하세요.';
+                statusEl.style.background = '#fff3cd';
+                statusEl.style.color = '#856404';
+                aiConnected = false;
+                updateAiButton(false);
+                return;
+            }
+
+            const result = await window.electronAPI.aiTest();
+            if (result.success) {
+                statusEl.innerHTML = `✅ 연결됨 (${result.provider})`;
+                statusEl.style.background = '#d4edda';
+                statusEl.style.color = '#155724';
+                aiConnected = true;
+                updateAiButton(true);
+            } else {
+                statusEl.innerHTML = `❌ 연결 실패: ${result.error}`;
+                statusEl.style.background = '#f8d7da';
+                statusEl.style.color = '#721c24';
+                aiConnected = false;
+                updateAiButton(false);
+            }
+        }
+
+        // AI 버튼 상태 업데이트
+        function updateAiButton(connected) {
+            const btn = document.getElementById('aiBtn');
+            if (connected) {
+                btn.style.background = '#27ae60';
+                btn.textContent = '🤖 AI 비서 ✓';
+            } else {
+                btn.style.background = '#8e44ad';
+                btn.textContent = '🤖 AI 비서';
+            }
+        }
+
+        // AI 메시지 전송
+        async function sendAiMessage() {
+            const input = document.getElementById('aiInput');
+            const message = input.value.trim();
+
+            if (!message) return;
+
+            if (!aiConnected) {
+                showToast('AI가 연결되지 않았습니다. .env 파일에 API 키를 설정하세요.', true);
+                return;
+            }
+
+            // 사용자 메시지 표시
+            addAiMessage(message, 'user');
+            input.value = '';
+
+            // 로딩 표시
+            const loadingEl = addAiMessage('생각 중...', 'loading');
+
+            // 컨텍스트 준비 (현재 학생 데이터, 오늘 일정 등)
+            const today = new Date();
+            const dayNames = ['일', '월', '화', '수', '목', '금', '토'];
+            const todayDay = dayNames[today.getDay()];
+
+            const todaySchedule = students.filter(s => s.day === todayDay);
+
+            const context = {
+                students: students,
+                todaySchedule: todaySchedule,
+                today: today.toLocaleDateString('ko-KR'),
+                todayDay: todayDay
+            };
+
+            // AI 요청
+            const result = await window.electronAPI.aiChat({ message, context });
+
+            // 로딩 제거
+            loadingEl.remove();
+
+            if (result.success) {
+                addAiMessage(result.message, 'assistant');
+            } else {
+                addAiMessage(`오류: ${result.error}`, 'assistant');
+            }
+        }
+
+        // 채팅 메시지 추가
+        function addAiMessage(text, type) {
+            const container = document.getElementById('aiChatMessages');
+            const div = document.createElement('div');
+            div.className = `ai-message ai-${type}`;
+            div.innerHTML = text.replace(/\n/g, '<br>');
+            container.appendChild(div);
+            container.scrollTop = container.scrollHeight;
+            return div;
+        }
+
+        // 대화 초기화
+        async function clearAiChat() {
+            await window.electronAPI.aiClearHistory();
+            const container = document.getElementById('aiChatMessages');
+            container.innerHTML = `
+                <div class="ai-message ai-assistant">
+                    대화가 초기화되었습니다. 새로운 대화를 시작하세요! 🔄<br><br>
+                    <b>질문 예시:</b><br>
+                    📅 "오늘 수업 일정 알려줘"<br>
+                    👨‍🎓 "중2 학생 목록 보여줘"<br>
+                    📝 "홍길동 학생 정보 알려줘"
+                </div>
+            `;
+            showToast('대화가 초기화되었습니다.');
+        }
+
+        // AI 초기화
+        async function initAi() {
+            const config = await window.electronAPI.aiGetConfig();
+            if (config.hasAnthropicKey || config.hasOpenaiKey || config.hasGoogleKey) {
+                const result = await window.electronAPI.aiTest();
+                aiConnected = result.success;
+                updateAiButton(result.success);
+            }
+        }
+
+        // ===== AI 비서 기능 끝 =====
+
         // 앱 초기화
         init();
+        initNotion();
+        initAi();
     </script>
 </body>
 </html>

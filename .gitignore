@@ -1,6 +1,7 @@
 # 개인 데이터
 students-data.json
 attendance/
+notion-config.json
 
 # PDF 및 학습 자료
 *.pdf
