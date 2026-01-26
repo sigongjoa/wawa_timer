@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>알파시티점 수학 방학 시간표</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
+            background: #f5f7fa;
+            padding: 20px;
+            color: #333;
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #2c3e50;
+        }
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .tab-group {
+            display: flex;
+            gap: 5px;
+            background: #e0e5ec;
+            padding: 5px;
+            border-radius: 10px;
+        }
+        .tab-group-label {
+            font-size: 12px;
+            color: #666;
+            padding: 5px 10px;
+            display: flex;
+            align-items: center;
+        }
+        .tab {
+            padding: 10px 20px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        .tab:hover {
+            background: #fff;
+        }
+        .tab.active {
+            background: #3498db;
+            color: white;
+        }
+        .view-tabs .tab.active {
+            background: #27ae60;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+        th {
+            background: #34495e;
+            color: white;
+            font-weight: 500;
+        }
+        tr:hover {
+            background: #f8f9fa;
+        }
+        .grade-1 { border-left: 4px solid #3498db; }
+        .grade-2 { border-left: 4px solid #9b59b6; }
+        .grade-3 { border-left: 4px solid #e74c3c; }
+        .grade-high1 { border-left: 4px solid #f39c12; }
+        .grade-high2 { border-left: 4px solid #1abc9c; }
+        .grade-high3 { border-left: 4px solid #e67e22; }
+        .grade-etc { border-left: 4px solid #95a5a6; }
+
+        .grade-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+            color: white;
+        }
+        .badge-중1 { background: #3498db; }
+        .badge-중2 { background: #9b59b6; }
+        .badge-중3 { background: #e74c3c; }
+        .badge-고1 { background: #f39c12; }
+        .badge-고2 { background: #1abc9c; }
+        .badge-고3 { background: #e67e22; }
+        .badge-검정고시 { background: #95a5a6; }
+
+        .material-note {
+            font-size: 13px;
+            color: #666;
+            max-width: 300px;
+        }
+        .link-btn {
+            display: inline-block;
+            padding: 5px 12px;
+            background: #3498db;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-size: 12px;
+            margin: 2px;
+            transition: background 0.2s;
+        }
+        .link-btn:hover {
+            background: #2980b9;
+        }
+        .link-btn.folder {
+            background: #27ae60;
+        }
+        .link-btn.folder:hover {
+            background: #229954;
+        }
+        .link-btn.drive {
+            background: #ea4335;
+        }
+        .link-btn.drive:hover {
+            background: #c5221f;
+        }
+        .links-cell {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+        }
+        .time {
+            font-weight: 500;
+            white-space: nowrap;
+        }
+        .student-name {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        .day-화 { color: #e74c3c; }
+        .day-목 { color: #3498db; }
+        .day-토 { color: #27ae60; }
+
+        .no-data {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+
+        .legend {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+            font-size: 13px;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .legend-color {
+            width: 20px;
+            height: 4px;
+            border-radius: 2px;
+        }
+
+        @media (max-width: 768px) {
+            table {
+                font-size: 14px;
+            }
+            th, td {
+                padding: 8px 10px;
+            }
+            .material-note {
+                max-width: 150px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>알파시티점 수학 방학 시간표</h1>
+
+    <div class="legend">
+        <div class="legend-item"><div class="legend-color" style="background:#3498db"></div>중1</div>
+        <div class="legend-item"><div class="legend-color" style="background:#9b59b6"></div>중2</div>
+        <div class="legend-item"><div class="legend-color" style="background:#e74c3c"></div>중3</div>
+        <div class="legend-item"><div class="legend-color" style="background:#f39c12"></div>고1</div>
+        <div class="legend-item"><div class="legend-color" style="background:#1abc9c"></div>고2</div>
+        <div class="legend-item"><div class="legend-color" style="background:#e67e22"></div>고3</div>
+        <div class="legend-item"><div class="legend-color" style="background:#95a5a6"></div>기타</div>
+    </div>
+
+    <div class="tabs">
+        <div class="tab-group view-tabs">
+            <span class="tab-group-label">보기:</span>
+            <button class="tab active" data-view="day">요일별</button>
+            <button class="tab" data-view="student">학생별</button>
+        </div>
+        <div class="tab-group day-tabs">
+            <span class="tab-group-label">요일:</span>
+            <button class="tab active" data-day="all">전체</button>
+            <button class="tab" data-day="화">화요일</button>
+            <button class="tab" data-day="목">목요일</button>
+            <button class="tab" data-day="토">토요일</button>
+        </div>
+    </div>
+
+    <div id="tableContainer"></div>
+
+    <script>
+        // 학생 데이터
+        const students = [
+            // 중1
+            { name: "최고은", grade: "중1", day: "화", start: "15:00", end: "16:30", note: "EBS 뉴런 중1수학 (초록색 책, 풀지 않은 부분부터 정수와 유리수의 사칙연산 전까지, 개념북→실전북 순서)", localFolder: null, driveLinks: [] },
+            { name: "최고은", grade: "중1", day: "목", start: "15:00", end: "16:30", note: "EBS 뉴런 중1수학 (초록색 책, 풀지 않은 부분부터 정수와 유리수의 사칙연산 전까지, 개념북→실전북 순서)", localFolder: null, driveLinks: [] },
+            { name: "강은서", grade: "중1", day: "목", start: "15:00", end: "16:30", note: "RPM (노란색 책, 2회독이라 쭉 풀면 됩니다)", localFolder: null, driveLinks: [] },
+            { name: "강은서", grade: "중1", day: "토", start: "13:00", end: "14:30", note: "RPM (노란색 책, 2회독이라 쭉 풀면 됩니다)", localFolder: null, driveLinks: [] },
+            { name: "박도은", grade: "중1", day: "화", start: "15:30", end: "17:00", note: "EBS 뉴런 중1수학 (초록색 책, 풀지 않은 부분부터 정수와 유리수의 사칙연산 전까지, 개념북→실전북 순서)", localFolder: null, driveLinks: [] },
+            { name: "박도은", grade: "중1", day: "목", start: "15:30", end: "17:00", note: "EBS 뉴런 중1수학 (초록색 책, 풀지 않은 부분부터 정수와 유리수의 사칙연산 전까지, 개념북→실전북 순서)", localFolder: null, driveLinks: [] },
+
+            // 중2
+            { name: "김성준", grade: "중2", day: "화", start: "14:00", end: "16:00", note: "", localFolder: "김지후 김성준 권순우", driveLinks: ["https://drive.google.com/file/d/1F59yTPbcXYxUrL60IHTsW9HeaK1zSFYL/view", "https://drive.google.com/file/d/1x03Bc3O9WlDDP9pZkozYlxMcJgwos3if/view", "https://drive.google.com/file/d/1AKXS4oqjOUZ1HXLQYXUQzmfA0GDVoMqz/view"] },
+            { name: "김성준", grade: "중2", day: "목", start: "14:00", end: "16:30", note: "", localFolder: "김지후 김성준 권순우", driveLinks: ["https://drive.google.com/file/d/10LHuhZeeWz3N0rHehbIvRhilct69027z/view", "https://drive.google.com/file/d/1dDFyHWwLVuqHazMbrpb_Yw9MKJolRVzb/view"] },
+            { name: "김지후", grade: "중2", day: "화", start: "18:00", end: "19:30", note: "", localFolder: "김지후 김성준 권순우", driveLinks: ["https://drive.google.com/file/d/1F59yTPbcXYxUrL60IHTsW9HeaK1zSFYL/view", "https://drive.google.com/file/d/1x03Bc3O9WlDDP9pZkozYlxMcJgwos3if/view", "https://drive.google.com/file/d/1AKXS4oqjOUZ1HXLQYXUQzmfA0GDVoMqz/view"] },
+            { name: "김지후", grade: "중2", day: "목", start: "18:00", end: "19:30", note: "", localFolder: "김지후 김성준 권순우", driveLinks: ["https://drive.google.com/file/d/10LHuhZeeWz3N0rHehbIvRhilct69027z/view", "https://drive.google.com/file/d/1dDFyHWwLVuqHazMbrpb_Yw9MKJolRVzb/view"] },
+            { name: "권순우", grade: "중2", day: "화", start: "14:00", end: "15:30", note: "", localFolder: "김지후 김성준 권순우", driveLinks: ["https://drive.google.com/file/d/1F59yTPbcXYxUrL60IHTsW9HeaK1zSFYL/view", "https://drive.google.com/file/d/1x03Bc3O9WlDDP9pZkozYlxMcJgwos3if/view", "https://drive.google.com/file/d/1AKXS4oqjOUZ1HXLQYXUQzmfA0GDVoMqz/view"] },
+            { name: "권순우", grade: "중2", day: "목", start: "14:00", end: "15:30", note: "", localFolder: "김지후 김성준 권순우", driveLinks: ["https://drive.google.com/file/d/10LHuhZeeWz3N0rHehbIvRhilct69027z/view", "https://drive.google.com/file/d/1dDFyHWwLVuqHazMbrpb_Yw9MKJolRVzb/view"] },
+            { name: "권순우", grade: "중2", day: "토", start: "13:00", end: "14:30", note: "", localFolder: "김지후 김성준 권순우", driveLinks: ["https://drive.google.com/file/d/10LHuhZeeWz3N0rHehbIvRhilct69027z/view", "https://drive.google.com/file/d/1dDFyHWwLVuqHazMbrpb_Yw9MKJolRVzb/view"] },
+
+            // 중3
+            { name: "류호진", grade: "중3", day: "화", start: "15:00", end: "18:00", note: "반드시 서술형 식을 적어야 합니다", localFolder: "류호진(반드시 서술형 식을 적어야 합니다)", driveLinks: ["https://drive.google.com/file/d/1TW-SlgtvsZoqf228JMULL3pOG6hqBkr_/view", "https://drive.google.com/file/d/1o1ZH6K69UlpuufayrXHTeavIG_zplkxW/view", "https://drive.google.com/file/d/1qWw1xPZsFEvLcdUX0siCOJYQFWZwoWnB/view", "https://drive.google.com/file/d/1sA5uYWHBiW14X1oGxXhnn_blJQrSAR_1/view"] },
+            { name: "류호진", grade: "중3", day: "목", start: "15:00", end: "16:30", note: "반드시 서술형 식을 적어야 합니다", localFolder: "류호진(반드시 서술형 식을 적어야 합니다)", driveLinks: ["https://drive.google.com/file/d/13-_0-CkWKjGEAPdNMpLHjIHUnRsmGc19/view", "https://drive.google.com/file/d/1h_YQFAYu7LZ5QluTlf8JTY2QZ7GmoDrD/view"] },
+            { name: "신채원", grade: "중3", day: "화", start: "16:00", end: "19:00", note: "", localFolder: "신채원", driveLinks: ["https://drive.google.com/drive/folders/18uWh-fESqsv0jIJO_tVbjZQEakq2C-0T"] },
+            { name: "신채원", grade: "중3", day: "목", start: "16:00", end: "17:30", note: "", localFolder: "신채원", driveLinks: ["https://drive.google.com/drive/folders/18uWh-fESqsv0jIJO_tVbjZQEakq2C-0T"] },
+
+            // 고1
+            { name: "안성민", grade: "고1", day: "화", start: "17:00", end: "19:30", note: "", localFolder: "정윤재 하진서 안성민", driveLinks: [] },
+            { name: "안성민", grade: "고1", day: "목", start: "17:00", end: "19:00", note: "", localFolder: "정윤재 하진서 안성민", driveLinks: [] },
+            { name: "류하진", grade: "고1", day: "목", start: "15:30", end: "18:30", note: "", localFolder: "류하진", driveLinks: ["https://drive.google.com/drive/folders/1c66rQPyVwjvjl91hc_sxC-1n62dZqD35"] },
+            { name: "하진서", grade: "고1", day: "화", start: "17:00", end: "18:30", note: "", localFolder: "정윤재 하진서 안성민", driveLinks: [] },
+            { name: "하진서", grade: "고1", day: "목", start: "17:00", end: "18:30", note: "", localFolder: "정윤재 하진서 안성민", driveLinks: [] },
+            { name: "정윤재", grade: "고1", day: "화", start: "16:00", end: "18:30", note: "", localFolder: "정윤재 하진서 안성민", driveLinks: [] },
+            { name: "정윤재", grade: "고1", day: "목", start: "16:00", end: "18:00", note: "", localFolder: "정윤재 하진서 안성민", driveLinks: [] },
+
+            // 고2
+            { name: "박도윤", grade: "고2", day: "화", start: "14:30", end: "16:00", note: "", localFolder: "최은서 박도윤 문정빈", driveLinks: [] },
+            { name: "박도윤", grade: "고2", day: "목", start: "14:30", end: "16:00", note: "", localFolder: "최은서 박도윤 문정빈", driveLinks: [] },
+            { name: "박도윤", grade: "고2", day: "토", start: "14:30", end: "16:00", note: "", localFolder: "최은서 박도윤 문정빈", driveLinks: [] },
+            { name: "최은서", grade: "고2", day: "화", start: "17:00", end: "19:30", note: "", localFolder: "최은서 박도윤 문정빈", driveLinks: [] },
+            { name: "최은서", grade: "고2", day: "목", start: "18:00", end: "20:00", note: "", localFolder: "최은서 박도윤 문정빈", driveLinks: [] },
+            { name: "문정빈", grade: "고2", day: "화", start: "16:00", end: "17:30", note: "", localFolder: "최은서 박도윤 문정빈", driveLinks: [] },
+            { name: "문정빈", grade: "고2", day: "목", start: "16:00", end: "17:30", note: "", localFolder: "최은서 박도윤 문정빈", driveLinks: [] },
+            { name: "문정빈", grade: "고2", day: "토", start: "14:30", end: "16:00", note: "", localFolder: "최은서 박도윤 문정빈", driveLinks: [] },
+            { name: "손동민", grade: "고2", day: "화", start: "15:30", end: "18:00", note: "", localFolder: "손동민", driveLinks: ["https://drive.google.com/drive/folders/1N92uzDtMA1vKDMWaDO6aJUg9kHREFoYN"] },
+            { name: "손동민", grade: "고2", day: "목", start: "14:00", end: "16:00", note: "", localFolder: "손동민", driveLinks: ["https://drive.google.com/drive/folders/1N92uzDtMA1vKDMWaDO6aJUg9kHREFoYN"] },
+            { name: "권도훈", grade: "고2", day: "화", start: "18:00", end: "19:30", note: "쉬운 문제만 진도 나가기. 1-1-1 풀었다고 해도 복습차원에서 다시 풀기", localFolder: "권도훈 (쉬운 문제만 진도를 나가주시면 됩니다)", driveLinks: ["https://drive.google.com/file/d/1VAmZRE1L0zeEzLlaAZyq8PK9yUNicxWW/view"] },
+            { name: "권도훈", grade: "고2", day: "목", start: "18:00", end: "19:30", note: "", localFolder: "권도훈", driveLinks: ["https://drive.google.com/file/d/1w8feeERcI6flA4ApAlldxEe4nujFiITD/view"] },
+
+            // 고3
+            { name: "윤승환", grade: "고3", day: "목", start: "16:30", end: "18:00", note: "평균값의 정리, 최대최소 정리 부분은 풀지 않음", localFolder: "윤승환(평균값의 정리, 최대최소 정리 부분은 풀지 않습니다)", driveLinks: [] },
+            { name: "송하선", grade: "고3", day: "목", start: "18:00", end: "19:30", note: "", localFolder: "송하선", driveLinks: ["https://drive.google.com/drive/folders/13Qdtkei9ZxQDVwWrU9_ABfjoRjhSA3tZ"] },
+            { name: "송하선", grade: "고3", day: "토", start: "13:00", end: "14:30", note: "", localFolder: "송하선", driveLinks: ["https://drive.google.com/drive/folders/13Qdtkei9ZxQDVwWrU9_ABfjoRjhSA3tZ"] },
+            { name: "김광민", grade: "고3", day: "화", start: "15:00", end: "16:30", note: "이항정리", localFolder: "김광민", driveLinks: ["https://drive.google.com/file/d/1wtE-L37eFVoAxpuW916i2VJTSljxyJxr/view", "https://drive.google.com/file/d/1cEubNlrt4Qm5KXX1VhdTW3J8WLv-UizK/view", "https://drive.google.com/file/d/1l-mPSoD0OWWOAKTfzFhilesxLvoXIYdc/view"] },
+            { name: "김광민", grade: "고3", day: "목", start: "15:00", end: "16:30", note: "이항정리", localFolder: "김광민", driveLinks: ["https://drive.google.com/file/d/1wtE-L37eFVoAxpuW916i2VJTSljxyJxr/view"] },
+            { name: "박동진", grade: "고3", day: "화", start: "15:30", end: "17:00", note: "", localFolder: "박동진", driveLinks: ["https://drive.google.com/drive/folders/1gw2BLEqFMV4FUbW4CNZvpRhiFKbV4hBb"] },
+            { name: "박동진", grade: "고3", day: "목", start: "15:00", end: "16:30", note: "", localFolder: "박동진", driveLinks: ["https://drive.google.com/drive/folders/1gw2BLEqFMV4FUbW4CNZvpRhiFKbV4hBb"] },
+
+            // 검정고시
+            { name: "예원", grade: "검정고시", day: "화", start: "14:00", end: "16:30", note: "진도 나가기 - 단원별로 기초 문제만 풀기", localFolder: "예원(진도를 나가야 합니다-단원별로 기초 문제만 풀면 됩니다)", driveLinks: [] },
+            { name: "예원", grade: "검정고시", day: "토", start: "14:00", end: "16:00", note: "진도 나가기 - 단원별로 기초 문제만 풀기", localFolder: "예원(진도를 나가야 합니다-단원별로 기초 문제만 풀면 됩니다)", driveLinks: [] },
+        ];
+
+        // 현재 파일의 디렉토리 경로 (상대 경로 사용)
+        const basePath = "assets/수학자료/";
+
+        let currentView = 'day';
+        let currentDay = 'all';
+
+        function getGradeClass(grade) {
+            const map = {
+                '중1': 'grade-1',
+                '중2': 'grade-2',
+                '중3': 'grade-3',
+                '고1': 'grade-high1',
+                '고2': 'grade-high2',
+                '고3': 'grade-high3',
+                '검정고시': 'grade-etc'
+            };
+            return map[grade] || 'grade-etc';
+        }
+
+        function getGradeOrder(grade) {
+            const order = ['중1', '중2', '중3', '고1', '고2', '고3', '검정고시'];
+            return order.indexOf(grade);
+        }
+
+        function timeToMinutes(time) {
+            const [h, m] = time.split(':').map(Number);
+            return h * 60 + m;
+        }
+
+        function renderLinks(student) {
+            let html = '';
+
+            if (student.localFolder) {
+                const folderPath = basePath + encodeURIComponent(student.localFolder);
+                html += `<a href="${folderPath}" class="link-btn folder" target="_blank" title="로컬 폴더 열기">📁 자료폴더</a>`;
+            }
+
+            student.driveLinks.forEach((link, i) => {
+                const isFolder = link.includes('/folders/');
+                const label = isFolder ? '📂 Drive' : `📄 자료${i+1}`;
+                html += `<a href="${link}" class="link-btn drive" target="_blank">${label}</a>`;
+            });
+
+            if (!student.localFolder && student.driveLinks.length === 0 && student.note) {
+                html += '<span style="color:#999;font-size:12px;">교재 사용</span>';
+            }
+
+            return html || '-';
+        }
+
+        function renderTable(data) {
+            if (data.length === 0) {
+                return '<div class="no-data">해당 조건의 데이터가 없습니다.</div>';
+            }
+
+            let html = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>이름</th>
+                            <th>학년</th>
+                            <th>요일</th>
+                            <th>시간</th>
+                            <th>비고/안내사항</th>
+                            <th>자료 링크</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+
+            data.forEach(s => {
+                html += `
+                    <tr class="${getGradeClass(s.grade)}">
+                        <td class="student-name">${s.name}</td>
+                        <td><span class="grade-badge badge-${s.grade}">${s.grade}</span></td>
+                        <td class="day-${s.day}">${s.day}</td>
+                        <td class="time">${s.start} ~ ${s.end}</td>
+                        <td class="material-note">${s.note || '-'}</td>
+                        <td class="links-cell">${renderLinks(s)}</td>
+                    </tr>
+                `;
+            });
+
+            html += '</tbody></table>';
+            return html;
+        }
+
+        function render() {
+            let filtered = [...students];
+
+            // 요일 필터
+            if (currentDay !== 'all') {
+                filtered = filtered.filter(s => s.day === currentDay);
+            }
+
+            // 정렬
+            if (currentView === 'day') {
+                // 요일별: 시간순 정렬
+                const dayOrder = ['화', '목', '토'];
+                filtered.sort((a, b) => {
+                    const dayDiff = dayOrder.indexOf(a.day) - dayOrder.indexOf(b.day);
+                    if (dayDiff !== 0) return dayDiff;
+                    return timeToMinutes(a.start) - timeToMinutes(b.start);
+                });
+            } else {
+                // 학생별: 학년 → 이름 → 요일 순 정렬
+                filtered.sort((a, b) => {
+                    const gradeDiff = getGradeOrder(a.grade) - getGradeOrder(b.grade);
+                    if (gradeDiff !== 0) return gradeDiff;
+                    const nameDiff = a.name.localeCompare(b.name, 'ko');
+                    if (nameDiff !== 0) return nameDiff;
+                    const dayOrder = ['화', '목', '토'];
+                    return dayOrder.indexOf(a.day) - dayOrder.indexOf(b.day);
+                });
+            }
+
+            document.getElementById('tableContainer').innerHTML = renderTable(filtered);
+        }
+
+        // 탭 이벤트
+        document.querySelectorAll('.view-tabs .tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.view-tabs .tab').forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                currentView = tab.dataset.view;
+                render();
+            });
+        });
+
+        document.querySelectorAll('.day-tabs .tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.day-tabs .tab').forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                currentDay = tab.dataset.day;
+                render();
+            });
+        });
+
+        // 초기 렌더링
+        render();
+    </script>
+</body>
+</html>

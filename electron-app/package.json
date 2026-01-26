@@ -1,0 +1,45 @@
+{
+  "name": "math-schedule-manager",
+  "version": "1.0.0",
+  "description": "알파시티점 수학 시간표 관리 프로그램",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder --win dir",
+    "build:portable": "electron-builder --win portable",
+    "build:installer": "electron-builder --win nsis"
+  },
+  "author": "알파시티점",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^28.0.0",
+    "electron-builder": "^24.9.1"
+  },
+  "build": {
+    "appId": "com.alphacity.math-schedule",
+    "productName": "수학시간표관리",
+    "directories": {
+      "output": "dist"
+    },
+    "win": {
+      "target": "dir",
+      "signAndEditExecutable": false,
+      "sign": false
+    },
+    "forceCodeSigning": false,
+    "npmRebuild": false,
+    "portable": {
+      "artifactName": "수학시간표관리.exe"
+    },
+    "files": [
+      "**/*",
+      "!dist/**"
+    ],
+    "extraFiles": [
+      {
+        "from": "../assets/수학자료",
+        "to": "수학자료"
+      }
+    ]
+  }
+}

@@ -1,0 +1,31 @@
+# 개인 데이터
+students-data.json
+attendance/
+
+# PDF 및 학습 자료
+*.pdf
+assets/수학자료/
+assets/*.zip
+
+# Node.js
+node_modules/
+package-lock.json
+
+# Electron 빌드 결과물
+dist/
+build/
+*.exe
+
+# OS 파일
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# 로그
+*.log
+npm-debug.log*

@@ -1,0 +1,2131 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>알파시티점 수학 시간표 관리</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
+            background: #f5f7fa;
+            padding: 20px;
+            color: #333;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        h1 {
+            color: #2c3e50;
+        }
+        .header-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        .btn-primary {
+            background: #3498db;
+            color: white;
+        }
+        .btn-primary:hover {
+            background: #2980b9;
+        }
+        .btn-success {
+            background: #27ae60;
+            color: white;
+        }
+        .btn-success:hover {
+            background: #229954;
+        }
+        .btn-danger {
+            background: #e74c3c;
+            color: white;
+        }
+        .btn-danger:hover {
+            background: #c0392b;
+        }
+        .btn-secondary {
+            background: #95a5a6;
+            color: white;
+        }
+        .btn-secondary:hover {
+            background: #7f8c8d;
+        }
+        .btn-sm {
+            padding: 5px 10px;
+            font-size: 12px;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .tab-group {
+            display: flex;
+            gap: 5px;
+            background: #e0e5ec;
+            padding: 5px;
+            border-radius: 10px;
+        }
+        .tab-group-label {
+            font-size: 12px;
+            color: #666;
+            padding: 5px 10px;
+            display: flex;
+            align-items: center;
+        }
+        .tab {
+            padding: 10px 20px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        .tab:hover {
+            background: #fff;
+        }
+        .tab.active {
+            background: #3498db;
+            color: white;
+        }
+        .view-tabs .tab.active {
+            background: #27ae60;
+        }
+        .view-tabs .tab[data-view="realtime"].active {
+            background: #e67e22;
+        }
+        .grade-tabs .tab.active {
+            background: #9b59b6;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        th, td {
+            padding: 12px 10px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+            font-size: 13px;
+        }
+        th {
+            background: #34495e;
+            color: white;
+            font-weight: 500;
+            white-space: nowrap;
+        }
+        tr:hover {
+            background: #f8f9fa;
+        }
+        .grade-1 { border-left: 4px solid #3498db; }
+        .grade-2 { border-left: 4px solid #9b59b6; }
+        .grade-3 { border-left: 4px solid #e74c3c; }
+        .grade-high1 { border-left: 4px solid #f39c12; }
+        .grade-high2 { border-left: 4px solid #1abc9c; }
+        .grade-high3 { border-left: 4px solid #e67e22; }
+        .grade-etc { border-left: 4px solid #95a5a6; }
+
+        .grade-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 500;
+            color: white;
+            white-space: nowrap;
+        }
+        .badge-중1 { background: #3498db; }
+        .badge-중2 { background: #9b59b6; }
+        .badge-중3 { background: #e74c3c; }
+        .badge-고1 { background: #f39c12; }
+        .badge-고2 { background: #1abc9c; }
+        .badge-고3 { background: #e67e22; }
+        .badge-검정고시 { background: #95a5a6; }
+
+        .subject-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 500;
+            background: #667eea;
+            color: white;
+            white-space: nowrap;
+        }
+
+        .material-note {
+            font-size: 12px;
+            color: #666;
+            max-width: 200px;
+        }
+        .link-btn {
+            display: inline-block;
+            padding: 4px 8px;
+            background: #3498db;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-size: 11px;
+            margin: 2px;
+            transition: background 0.2s;
+            cursor: pointer;
+            border: none;
+        }
+        .link-btn:hover {
+            background: #2980b9;
+        }
+        .link-btn.folder {
+            background: #27ae60;
+        }
+        .link-btn.folder:hover {
+            background: #229954;
+        }
+        .link-btn.drive {
+            background: #ea4335;
+        }
+        .link-btn.drive:hover {
+            background: #c5221f;
+        }
+        .links-cell {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 3px;
+        }
+        .time {
+            font-weight: 500;
+            white-space: nowrap;
+        }
+        .student-name {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        .day-화 { color: #e74c3c; }
+        .day-목 { color: #3498db; }
+        .day-토 { color: #27ae60; }
+
+        /* 시간대별 보기 */
+        .timeslot-container {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        .timeslot-day {
+            flex: 1;
+            min-width: 300px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        .timeslot-day-header {
+            padding: 15px;
+            font-weight: 600;
+            font-size: 16px;
+            text-align: center;
+        }
+        .timeslot-day-header.day-화 { background: #e74c3c; color: white; }
+        .timeslot-day-header.day-목 { background: #3498db; color: white; }
+        .timeslot-day-header.day-토 { background: #27ae60; color: white; }
+        .timeslot-row {
+            display: flex;
+            border-bottom: 1px solid #eee;
+            min-height: 40px;
+        }
+        .timeslot-row:last-child {
+            border-bottom: none;
+        }
+        .timeslot-row.current-time {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+        }
+        .timeslot-time {
+            width: 70px;
+            padding: 10px;
+            font-weight: 500;
+            font-size: 13px;
+            background: #f8f9fa;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-right: 1px solid #eee;
+        }
+        .timeslot-students {
+            flex: 1;
+            padding: 8px 10px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            align-items: center;
+        }
+        .timeslot-student {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 10px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: 500;
+            background: #e0e5ec;
+            color: #333;
+        }
+        .timeslot-student.badge-중1 { background: #3498db; color: white; }
+        .timeslot-student.badge-중2 { background: #9b59b6; color: white; }
+        .timeslot-student.badge-중3 { background: #e74c3c; color: white; }
+        .timeslot-student.badge-고1 { background: #f39c12; color: white; }
+        .timeslot-student.badge-고2 { background: #1abc9c; color: white; }
+        .timeslot-student.badge-고3 { background: #e67e22; color: white; }
+        .timeslot-student.badge-검정고시 { background: #95a5a6; color: white; }
+        .current-time-indicator {
+            background: #28a745;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 15px;
+            display: inline-block;
+        }
+        .timeslot-empty {
+            color: #ccc;
+            font-size: 12px;
+            font-style: italic;
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+
+        .legend {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+            font-size: 13px;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .legend-color {
+            width: 20px;
+            height: 4px;
+            border-radius: 2px;
+        }
+
+        .actions-cell {
+            white-space: nowrap;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal.show {
+            display: flex;
+        }
+        .modal-content {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .modal-header h2 {
+            color: #2c3e50;
+        }
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #999;
+        }
+        .modal-close:hover {
+            color: #333;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: #555;
+        }
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: inherit;
+        }
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+        .form-row {
+            display: flex;
+            gap: 15px;
+        }
+        .form-row .form-group {
+            flex: 1;
+        }
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .drive-links-list {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        .drive-link-item {
+            display: flex;
+            gap: 5px;
+        }
+        .drive-link-item input {
+            flex: 1;
+        }
+        .drive-link-item button {
+            padding: 8px 12px;
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            background: #27ae60;
+            color: white;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.3s;
+            z-index: 2000;
+        }
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        .toast.error {
+            background: #e74c3c;
+        }
+
+        /* 검색 */
+        .search-box {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        .search-box input {
+            flex: 1;
+            padding: 10px 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        .search-box input:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+
+        /* PDF 업로드 */
+        .pdf-section {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 10px;
+        }
+        .pdf-section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .pdf-section-header h4 {
+            margin: 0;
+            color: #555;
+            font-size: 14px;
+        }
+        .pdf-list {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .pdf-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 10px;
+            background: white;
+            border-radius: 5px;
+            font-size: 13px;
+        }
+        .pdf-item-name {
+            flex: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .pdf-item .btn-sm {
+            padding: 3px 8px;
+            font-size: 11px;
+        }
+        .no-pdf {
+            color: #999;
+            font-size: 13px;
+            text-align: center;
+            padding: 10px;
+        }
+        .pdf-folder {
+            margin-top: 8px;
+        }
+        .pdf-folder-header {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 10px;
+            background: #e8f4fd;
+            border-radius: 5px;
+            font-size: 13px;
+            font-weight: 500;
+            color: #2980b9;
+            cursor: pointer;
+            user-select: none;
+        }
+        .pdf-folder-header:hover {
+            background: #d4ebf9;
+        }
+        .pdf-folder-header .folder-icon {
+            transition: transform 0.2s;
+        }
+        .pdf-folder-header.collapsed .folder-icon {
+            transform: rotate(-90deg);
+        }
+        .pdf-folder-children {
+            margin-left: 15px;
+            padding-left: 10px;
+            border-left: 2px solid #e0e5ec;
+            margin-top: 5px;
+        }
+        .pdf-folder-children.hidden {
+            display: none;
+        }
+
+        /* 실시간 관리 뷰 스타일 */
+        .realtime-container {
+            display: flex;
+            gap: 20px;
+            height: calc(100vh - 280px);
+            min-height: 500px;
+        }
+        .realtime-panel {
+            flex: 1;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .realtime-panel-header {
+            padding: 15px 20px;
+            font-weight: 600;
+            font-size: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #eee;
+        }
+        .realtime-panel-header.waiting {
+            background: #3498db;
+            color: white;
+        }
+        .realtime-panel-header.active {
+            background: #27ae60;
+            color: white;
+        }
+        .realtime-panel-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 15px;
+        }
+        .realtime-card {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border-left: 4px solid #ddd;
+        }
+        .realtime-card:hover {
+            background: #e9ecef;
+            transform: translateX(5px);
+        }
+        .realtime-card.checked-in {
+            cursor: default;
+        }
+        .realtime-card.checked-in:hover {
+            transform: none;
+        }
+        .realtime-card .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        .realtime-card .card-name {
+            font-weight: 600;
+            font-size: 16px;
+            color: #2c3e50;
+        }
+        .realtime-card .card-time {
+            font-size: 13px;
+            color: #666;
+        }
+        .realtime-card .card-timer {
+            font-size: 24px;
+            font-weight: 700;
+            text-align: center;
+            padding: 10px;
+            border-radius: 8px;
+            background: #e9ecef;
+            margin: 10px 0;
+        }
+        .realtime-card .card-timer.warning {
+            background: #fff3cd;
+            color: #856404;
+        }
+        .realtime-card .card-timer.overtime {
+            background: #f8d7da;
+            color: #721c24;
+            animation: blink 1s infinite;
+        }
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0.5; }
+        }
+        .realtime-card .card-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+        }
+        .realtime-card .card-actions button {
+            flex: 1;
+        }
+        .realtime-card.grade-중1 { border-left-color: #3498db; }
+        .realtime-card.grade-중2 { border-left-color: #9b59b6; }
+        .realtime-card.grade-중3 { border-left-color: #e74c3c; }
+        .realtime-card.grade-고1 { border-left-color: #f39c12; }
+        .realtime-card.grade-고2 { border-left-color: #1abc9c; }
+        .realtime-card.grade-고3 { border-left-color: #e67e22; }
+        .realtime-card.grade-검정고시 { border-left-color: #95a5a6; }
+
+        .realtime-card.overtime-card {
+            background: #fff5f5;
+            border-left-color: #e74c3c !important;
+            animation: pulse-border 1.5s infinite;
+        }
+        @keyframes pulse-border {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.4); }
+            50% { box-shadow: 0 0 0 8px rgba(231, 76, 60, 0); }
+        }
+
+        .realtime-stats {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 15px;
+            padding: 15px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .realtime-stat {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .realtime-stat-value {
+            font-size: 24px;
+            font-weight: 700;
+        }
+        .realtime-stat-label {
+            font-size: 13px;
+            color: #666;
+        }
+        .realtime-stat.waiting .realtime-stat-value { color: #3498db; }
+        .realtime-stat.active .realtime-stat-value { color: #27ae60; }
+        .realtime-stat.completed .realtime-stat-value { color: #95a5a6; }
+
+        .realtime-current-time {
+            font-size: 28px;
+            font-weight: 700;
+            color: #2c3e50;
+        }
+        .realtime-current-date {
+            font-size: 14px;
+            color: #666;
+            margin-left: 15px;
+        }
+
+        .waiting-card-hint {
+            font-size: 12px;
+            color: #888;
+            text-align: center;
+            margin-top: 5px;
+        }
+        .no-students-message {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+        .btn-extend {
+            background: #f39c12;
+            color: white;
+        }
+        .btn-extend:hover {
+            background: #e67e22;
+        }
+        .add-extra-student {
+            border: 2px dashed #ddd;
+            background: transparent;
+            text-align: center;
+            padding: 20px;
+            color: #999;
+            cursor: pointer;
+            border-radius: 10px;
+            transition: all 0.2s;
+        }
+        .add-extra-student:hover {
+            border-color: #3498db;
+            color: #3498db;
+            background: #f8f9fa;
+        }
+
+        /* 요일 선택 드롭다운 */
+        .day-selector {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-left: 20px;
+        }
+        .day-selector label {
+            font-size: 14px;
+            color: #666;
+        }
+        .day-selector select {
+            padding: 8px 15px;
+            font-size: 16px;
+            font-weight: 600;
+            border: 2px solid #e67e22;
+            border-radius: 8px;
+            background: white;
+            color: #e67e22;
+            cursor: pointer;
+            outline: none;
+        }
+        .day-selector select:focus {
+            border-color: #d35400;
+        }
+        .day-selector .today-badge {
+            font-size: 11px;
+            padding: 3px 8px;
+            background: #27ae60;
+            color: white;
+            border-radius: 10px;
+            margin-left: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>알파시티점 수학 방학 시간표</h1>
+        <div class="header-buttons">
+            <button class="btn btn-success" onclick="openAddModal()">+ 학생 추가</button>
+            <button class="btn btn-primary" onclick="saveAllData()">💾 저장</button>
+        </div>
+    </div>
+
+    <div class="legend">
+        <div class="legend-item"><div class="legend-color" style="background:#3498db"></div>중1</div>
+        <div class="legend-item"><div class="legend-color" style="background:#9b59b6"></div>중2</div>
+        <div class="legend-item"><div class="legend-color" style="background:#e74c3c"></div>중3</div>
+        <div class="legend-item"><div class="legend-color" style="background:#f39c12"></div>고1</div>
+        <div class="legend-item"><div class="legend-color" style="background:#1abc9c"></div>고2</div>
+        <div class="legend-item"><div class="legend-color" style="background:#e67e22"></div>고3</div>
+        <div class="legend-item"><div class="legend-color" style="background:#95a5a6"></div>기타</div>
+    </div>
+
+    <div class="search-box">
+        <input type="text" id="searchInput" placeholder="학생 이름으로 검색..." oninput="render()">
+    </div>
+
+    <div class="tabs">
+        <div class="tab-group view-tabs">
+            <span class="tab-group-label">보기:</span>
+            <button class="tab" data-view="realtime">실시간</button>
+            <button class="tab active" data-view="day">요일별</button>
+            <button class="tab" data-view="student">학생별</button>
+            <button class="tab" data-view="grade">학년별</button>
+            <button class="tab" data-view="timeslot">시간대별</button>
+        </div>
+        <div class="tab-group day-tabs">
+            <span class="tab-group-label">요일:</span>
+            <button class="tab active" data-day="all">전체</button>
+            <button class="tab" data-day="화">화요일</button>
+            <button class="tab" data-day="목">목요일</button>
+            <button class="tab" data-day="토">토요일</button>
+        </div>
+        <div class="tab-group grade-tabs">
+            <span class="tab-group-label">학년:</span>
+            <button class="tab active" data-grade="all">전체</button>
+            <button class="tab" data-grade="중1">중1</button>
+            <button class="tab" data-grade="중2">중2</button>
+            <button class="tab" data-grade="중3">중3</button>
+            <button class="tab" data-grade="고1">고1</button>
+            <button class="tab" data-grade="고2">고2</button>
+            <button class="tab" data-grade="고3">고3</button>
+            <button class="tab" data-grade="검정고시">기타</button>
+        </div>
+    </div>
+
+    <div id="tableContainer"></div>
+
+    <!-- 추가/수정 모달 -->
+    <div class="modal" id="studentModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">학생 추가</h2>
+                <button class="modal-close" onclick="closeModal()">&times;</button>
+            </div>
+            <form id="studentForm" onsubmit="submitForm(event)">
+                <input type="hidden" id="editIndex" value="-1">
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>이름 *</label>
+                        <input type="text" id="formName" required>
+                    </div>
+                    <div class="form-group">
+                        <label>학년 *</label>
+                        <select id="formGrade" required>
+                            <option value="중1">중1</option>
+                            <option value="중2">중2</option>
+                            <option value="중3">중3</option>
+                            <option value="고1">고1</option>
+                            <option value="고2">고2</option>
+                            <option value="고3">고3</option>
+                            <option value="검정고시">검정고시</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>요일 *</label>
+                        <select id="formDay" required>
+                            <option value="화">화요일</option>
+                            <option value="목">목요일</option>
+                            <option value="토">토요일</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>시작시간 *</label>
+                        <input type="time" id="formStart" required>
+                    </div>
+                    <div class="form-group">
+                        <label>종료시간 *</label>
+                        <input type="time" id="formEnd" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>과목 *</label>
+                    <select id="formSubject" required>
+                        <option value="중1수학">중1수학</option>
+                        <option value="중2수학">중2수학</option>
+                        <option value="중3수학">중3수학</option>
+                        <option value="공통수학1">공통수학1</option>
+                        <option value="공통수학2">공통수학2</option>
+                        <option value="수학I">수학I</option>
+                        <option value="수학II">수학II</option>
+                        <option value="미적분">미적분</option>
+                        <option value="확률과통계">확률과통계</option>
+                        <option value="기하">기하</option>
+                        <option value="검정고시수학">검정고시수학</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>비고/안내사항</label>
+                    <textarea id="formNote" rows="2" placeholder="예: EBS 뉴런 중1수학 (초록색 책)"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>로컬 자료 폴더</label>
+                    <div style="display:flex;gap:10px;align-items:center;">
+                        <select id="formLocalFolder" style="flex:1;">
+                            <option value="">선택 안함</option>
+                        </select>
+                        <button type="button" class="btn btn-success btn-sm" onclick="createNewFolder()">새 폴더</button>
+                    </div>
+                </div>
+
+                <div class="pdf-section">
+                    <div class="pdf-section-header">
+                        <h4>PDF 자료 업로드</h4>
+                        <button type="button" class="btn btn-primary btn-sm" onclick="selectAndUploadPdf()">+ PDF 추가</button>
+                    </div>
+                    <div class="pdf-list" id="pdfList">
+                        <div class="no-pdf">폴더를 선택하면 PDF 목록이 표시됩니다</div>
+                    </div>
+                </div>
+
+                <div class="form-group" style="margin-top:15px;">
+                    <label>Google Drive 링크</label>
+                    <div class="drive-links-list" id="driveLinksContainer">
+                        <div class="drive-link-item">
+                            <input type="url" placeholder="https://drive.google.com/...">
+                            <button type="button" class="btn btn-danger btn-sm" onclick="removeDriveLink(this)">삭제</button>
+                        </div>
+                    </div>
+                    <button type="button" class="btn btn-secondary btn-sm" onclick="addDriveLink()" style="margin-top:5px">+ 링크 추가</button>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal()">취소</button>
+                    <button type="submit" class="btn btn-primary">저장</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 삭제 확인 모달 -->
+    <div class="modal" id="deleteModal">
+        <div class="modal-content" style="max-width:400px">
+            <div class="modal-header">
+                <h2>삭제 확인</h2>
+                <button class="modal-close" onclick="closeDeleteModal()">&times;</button>
+            </div>
+            <p id="deleteMessage" style="margin-bottom:20px"></p>
+            <div class="form-actions">
+                <button class="btn btn-secondary" onclick="closeDeleteModal()">취소</button>
+                <button class="btn btn-danger" id="confirmDeleteBtn">삭제</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 예정 외 학생 선택 모달 -->
+    <div class="modal" id="extraStudentModal">
+        <div class="modal-content" style="max-width:500px">
+            <div class="modal-header">
+                <h2>예정 외 학생 추가</h2>
+                <button class="modal-close" onclick="closeExtraStudentModal()">&times;</button>
+            </div>
+            <p style="margin-bottom:15px;color:#666;">수업을 시작할 학생을 선택하세요</p>
+            <div id="extraStudentList"></div>
+            <div class="form-actions" style="margin-top:15px;">
+                <button class="btn btn-secondary" onclick="closeExtraStudentModal()">취소</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div class="toast" id="toast"></div>
+
+    <script>
+        // 과목 목록
+        const subjects = [
+            '중1수학', '중2수학', '중3수학',
+            '공통수학1', '공통수학2',
+            '수학I', '수학II',
+            '미적분', '확률과통계', '기하',
+            '검정고시수학'
+        ];
+
+        // 기본 학생 데이터
+        const defaultStudents = [
+            { name: "최고은", grade: "중1", day: "화", start: "15:00", end: "16:30", subject: "중1수학", note: "EBS 뉴런 중1수학 (초록색 책, 풀지 않은 부분부터 정수와 유리수의 사칙연산 전까지, 개념북→실전북 순서)", localFolder: "", driveLinks: [] },
+            { name: "최고은", grade: "중1", day: "목", start: "15:00", end: "16:30", subject: "중1수학", note: "EBS 뉴런 중1수학 (초록색 책, 풀지 않은 부분부터 정수와 유리수의 사칙연산 전까지, 개념북→실전북 순서)", localFolder: "", driveLinks: [] },
+            { name: "강은서", grade: "중1", day: "목", start: "15:00", end: "16:30", subject: "중1수학", note: "RPM (노란색 책, 2회독이라 쭉 풀면 됩니다)", localFolder: "", driveLinks: [] },
+            { name: "강은서", grade: "중1", day: "토", start: "13:00", end: "14:30", subject: "중1수학", note: "RPM (노란색 책, 2회독이라 쭉 풀면 됩니다)", localFolder: "", driveLinks: [] },
+            { name: "박도은", grade: "중1", day: "화", start: "15:30", end: "17:00", subject: "중1수학", note: "EBS 뉴런 중1수학 (초록색 책, 풀지 않은 부분부터 정수와 유리수의 사칙연산 전까지, 개념북→실전북 순서)", localFolder: "", driveLinks: [] },
+            { name: "박도은", grade: "중1", day: "목", start: "15:30", end: "17:00", subject: "중1수학", note: "EBS 뉴런 중1수학 (초록색 책, 풀지 않은 부분부터 정수와 유리수의 사칙연산 전까지, 개념북→실전북 순서)", localFolder: "", driveLinks: [] },
+
+            { name: "김성준", grade: "중2", day: "화", start: "14:00", end: "16:00", subject: "중2수학", note: "", localFolder: "김지후 김성준 권순우", driveLinks: ["https://drive.google.com/file/d/1F59yTPbcXYxUrL60IHTsW9HeaK1zSFYL/view", "https://drive.google.com/file/d/1x03Bc3O9WlDDP9pZkozYlxMcJgwos3if/view", "https://drive.google.com/file/d/1AKXS4oqjOUZ1HXLQYXUQzmfA0GDVoMqz/view"] },
+            { name: "김성준", grade: "중2", day: "목", start: "14:00", end: "16:30", subject: "중2수학", note: "", localFolder: "김지후 김성준 권순우", driveLinks: ["https://drive.google.com/file/d/10LHuhZeeWz3N0rHehbIvRhilct69027z/view", "https://drive.google.com/file/d/1dDFyHWwLVuqHazMbrpb_Yw9MKJolRVzb/view"] },
+            { name: "김지후", grade: "중2", day: "화", start: "18:00", end: "19:30", subject: "중2수학", note: "", localFolder: "김지후 김성준 권순우", driveLinks: ["https://drive.google.com/file/d/1F59yTPbcXYxUrL60IHTsW9HeaK1zSFYL/view", "https://drive.google.com/file/d/1x03Bc3O9WlDDP9pZkozYlxMcJgwos3if/view", "https://drive.google.com/file/d/1AKXS4oqjOUZ1HXLQYXUQzmfA0GDVoMqz/view"] },
+            { name: "김지후", grade: "중2", day: "목", start: "18:00", end: "19:30", subject: "중2수학", note: "", localFolder: "김지후 김성준 권순우", driveLinks: ["https://drive.google.com/file/d/10LHuhZeeWz3N0rHehbIvRhilct69027z/view", "https://drive.google.com/file/d/1dDFyHWwLVuqHazMbrpb_Yw9MKJolRVzb/view"] },
+            { name: "권순우", grade: "중2", day: "화", start: "14:00", end: "15:30", subject: "중2수학", note: "", localFolder: "김지후 김성준 권순우", driveLinks: ["https://drive.google.com/file/d/1F59yTPbcXYxUrL60IHTsW9HeaK1zSFYL/view", "https://drive.google.com/file/d/1x03Bc3O9WlDDP9pZkozYlxMcJgwos3if/view", "https://drive.google.com/file/d/1AKXS4oqjOUZ1HXLQYXUQzmfA0GDVoMqz/view"] },
+            { name: "권순우", grade: "중2", day: "목", start: "14:00", end: "15:30", subject: "중2수학", note: "", localFolder: "김지후 김성준 권순우", driveLinks: ["https://drive.google.com/file/d/10LHuhZeeWz3N0rHehbIvRhilct69027z/view", "https://drive.google.com/file/d/1dDFyHWwLVuqHazMbrpb_Yw9MKJolRVzb/view"] },
+            { name: "권순우", grade: "중2", day: "토", start: "13:00", end: "14:30", subject: "중2수학", note: "", localFolder: "김지후 김성준 권순우", driveLinks: ["https://drive.google.com/file/d/10LHuhZeeWz3N0rHehbIvRhilct69027z/view", "https://drive.google.com/file/d/1dDFyHWwLVuqHazMbrpb_Yw9MKJolRVzb/view"] },
+
+            { name: "류호진", grade: "중3", day: "화", start: "15:00", end: "18:00", subject: "중3수학", note: "반드시 서술형 식을 적어야 합니다", localFolder: "류호진(반드시 서술형 식을 적어야 합니다)", driveLinks: ["https://drive.google.com/file/d/1TW-SlgtvsZoqf228JMULL3pOG6hqBkr_/view", "https://drive.google.com/file/d/1o1ZH6K69UlpuufayrXHTeavIG_zplkxW/view", "https://drive.google.com/file/d/1qWw1xPZsFEvLcdUX0siCOJYQFWZwoWnB/view", "https://drive.google.com/file/d/1sA5uYWHBiW14X1oGxXhnn_blJQrSAR_1/view"] },
+            { name: "류호진", grade: "중3", day: "목", start: "15:00", end: "16:30", subject: "중3수학", note: "반드시 서술형 식을 적어야 합니다", localFolder: "류호진(반드시 서술형 식을 적어야 합니다)", driveLinks: ["https://drive.google.com/file/d/13-_0-CkWKjGEAPdNMpLHjIHUnRsmGc19/view", "https://drive.google.com/file/d/1h_YQFAYu7LZ5QluTlf8JTY2QZ7GmoDrD/view"] },
+            { name: "신채원", grade: "중3", day: "화", start: "16:00", end: "19:00", subject: "중3수학", note: "", localFolder: "신채원", driveLinks: ["https://drive.google.com/drive/folders/18uWh-fESqsv0jIJO_tVbjZQEakq2C-0T"] },
+            { name: "신채원", grade: "중3", day: "목", start: "16:00", end: "17:30", subject: "중3수학", note: "", localFolder: "신채원", driveLinks: ["https://drive.google.com/drive/folders/18uWh-fESqsv0jIJO_tVbjZQEakq2C-0T"] },
+
+            { name: "안성민", grade: "고1", day: "화", start: "17:00", end: "19:30", subject: "공통수학1", note: "", localFolder: "정윤재 하진서 안성민", driveLinks: [] },
+            { name: "안성민", grade: "고1", day: "목", start: "17:00", end: "19:00", subject: "공통수학1", note: "", localFolder: "정윤재 하진서 안성민", driveLinks: [] },
+            { name: "류하진", grade: "고1", day: "목", start: "15:30", end: "18:30", subject: "공통수학1", note: "", localFolder: "류하진", driveLinks: ["https://drive.google.com/drive/folders/1c66rQPyVwjvjl91hc_sxC-1n62dZqD35"] },
+            { name: "하진서", grade: "고1", day: "화", start: "17:00", end: "18:30", subject: "공통수학1", note: "", localFolder: "정윤재 하진서 안성민", driveLinks: [] },
+            { name: "하진서", grade: "고1", day: "목", start: "17:00", end: "18:30", subject: "공통수학1", note: "", localFolder: "정윤재 하진서 안성민", driveLinks: [] },
+            { name: "정윤재", grade: "고1", day: "화", start: "16:00", end: "18:30", subject: "공통수학1", note: "", localFolder: "정윤재 하진서 안성민", driveLinks: [] },
+            { name: "정윤재", grade: "고1", day: "목", start: "16:00", end: "18:00", subject: "공통수학1", note: "", localFolder: "정윤재 하진서 안성민", driveLinks: [] },
+
+            { name: "박도윤", grade: "고2", day: "화", start: "14:30", end: "16:00", subject: "수학I", note: "", localFolder: "최은서 박도윤 문정빈", driveLinks: [] },
+            { name: "박도윤", grade: "고2", day: "목", start: "14:30", end: "16:00", subject: "수학I", note: "", localFolder: "최은서 박도윤 문정빈", driveLinks: [] },
+            { name: "박도윤", grade: "고2", day: "토", start: "14:30", end: "16:00", subject: "수학I", note: "", localFolder: "최은서 박도윤 문정빈", driveLinks: [] },
+            { name: "최은서", grade: "고2", day: "화", start: "17:00", end: "19:30", subject: "수학I", note: "", localFolder: "최은서 박도윤 문정빈", driveLinks: [] },
+            { name: "최은서", grade: "고2", day: "목", start: "18:00", end: "20:00", subject: "수학I", note: "", localFolder: "최은서 박도윤 문정빈", driveLinks: [] },
+            { name: "문정빈", grade: "고2", day: "화", start: "16:00", end: "17:30", subject: "수학I", note: "", localFolder: "최은서 박도윤 문정빈", driveLinks: [] },
+            { name: "문정빈", grade: "고2", day: "목", start: "16:00", end: "17:30", subject: "수학I", note: "", localFolder: "최은서 박도윤 문정빈", driveLinks: [] },
+            { name: "문정빈", grade: "고2", day: "토", start: "14:30", end: "16:00", subject: "수학I", note: "", localFolder: "최은서 박도윤 문정빈", driveLinks: [] },
+            { name: "손동민", grade: "고2", day: "화", start: "15:30", end: "18:00", subject: "중1수학", note: "", localFolder: "손동민", driveLinks: ["https://drive.google.com/drive/folders/1N92uzDtMA1vKDMWaDO6aJUg9kHREFoYN"] },
+            { name: "손동민", grade: "고2", day: "목", start: "14:00", end: "16:00", subject: "중1수학", note: "", localFolder: "손동민", driveLinks: ["https://drive.google.com/drive/folders/1N92uzDtMA1vKDMWaDO6aJUg9kHREFoYN"] },
+            { name: "권도훈", grade: "고2", day: "화", start: "18:00", end: "19:30", subject: "수학I", note: "쉬운 문제만 진도 나가기. 1-1-1 풀었다고 해도 복습차원에서 다시 풀기", localFolder: "권도훈 (쉬운 문제만 진도를 나가주시면 됩니다)", driveLinks: ["https://drive.google.com/file/d/1VAmZRE1L0zeEzLlaAZyq8PK9yUNicxWW/view"] },
+            { name: "권도훈", grade: "고2", day: "목", start: "18:00", end: "19:30", subject: "수학I", note: "", localFolder: "권도훈", driveLinks: ["https://drive.google.com/file/d/1w8feeERcI6flA4ApAlldxEe4nujFiITD/view"] },
+
+            { name: "윤승환", grade: "고3", day: "목", start: "16:30", end: "18:00", subject: "수학II", note: "평균값의 정리, 최대최소 정리 부분은 풀지 않음", localFolder: "윤승환(평균값의 정리, 최대최소 정리 부분은 풀지 않습니다)", driveLinks: [] },
+            { name: "송하선", grade: "고3", day: "목", start: "18:00", end: "19:30", subject: "수학II", note: "", localFolder: "송하선", driveLinks: ["https://drive.google.com/drive/folders/13Qdtkei9ZxQDVwWrU9_ABfjoRjhSA3tZ"] },
+            { name: "송하선", grade: "고3", day: "토", start: "13:00", end: "14:30", subject: "수학II", note: "", localFolder: "송하선", driveLinks: ["https://drive.google.com/drive/folders/13Qdtkei9ZxQDVwWrU9_ABfjoRjhSA3tZ"] },
+            { name: "김광민", grade: "고3", day: "화", start: "15:00", end: "16:30", subject: "확률과통계", note: "이항정리", localFolder: "김광민", driveLinks: ["https://drive.google.com/file/d/1wtE-L37eFVoAxpuW916i2VJTSljxyJxr/view", "https://drive.google.com/file/d/1cEubNlrt4Qm5KXX1VhdTW3J8WLv-UizK/view", "https://drive.google.com/file/d/1l-mPSoD0OWWOAKTfzFhilesxLvoXIYdc/view"] },
+            { name: "김광민", grade: "고3", day: "목", start: "15:00", end: "16:30", subject: "확률과통계", note: "이항정리", localFolder: "김광민", driveLinks: ["https://drive.google.com/file/d/1wtE-L37eFVoAxpuW916i2VJTSljxyJxr/view"] },
+            { name: "박동진", grade: "고3", day: "화", start: "15:30", end: "17:00", subject: "확률과통계", note: "", localFolder: "박동진", driveLinks: ["https://drive.google.com/drive/folders/1gw2BLEqFMV4FUbW4CNZvpRhiFKbV4hBb"] },
+            { name: "박동진", grade: "고3", day: "목", start: "15:00", end: "16:30", subject: "확률과통계", note: "", localFolder: "박동진", driveLinks: ["https://drive.google.com/drive/folders/1gw2BLEqFMV4FUbW4CNZvpRhiFKbV4hBb"] },
+
+            { name: "예원", grade: "검정고시", day: "화", start: "14:00", end: "16:30", subject: "검정고시수학", note: "진도 나가기 - 단원별로 기초 문제만 풀기", localFolder: "예원(진도를 나가야 합니다-단원별로 기초 문제만 풀면 됩니다)", driveLinks: [] },
+            { name: "예원", grade: "검정고시", day: "토", start: "14:00", end: "16:00", subject: "검정고시수학", note: "진도 나가기 - 단원별로 기초 문제만 풀기", localFolder: "예원(진도를 나가야 합니다-단원별로 기초 문제만 풀면 됩니다)", driveLinks: [] },
+        ];
+
+        let students = [];
+        let folders = [];
+        let currentView = 'day';
+        let currentDay = 'all';
+        let currentGrade = 'all';
+        let deleteIndex = -1;
+
+        // 실시간 관리 관련 변수
+        let activeSessions = [];  // 현재 수업 중인 학생들
+        let realtimeInterval = null;  // 타이머 인터벌
+        let todayAttendance = { date: '', records: [] };  // 오늘 출석 기록
+        let selectedClassDay = null;  // 선택된 수업 요일 (화/목/토)
+
+        // 초기화
+        async function init() {
+            // 폴더 목록 로드
+            folders = await window.electronAPI.getFolders();
+            updateFolderSelect();
+
+            // 저장된 데이터 로드
+            const savedData = await window.electronAPI.loadData();
+            if (savedData && savedData.students) {
+                students = savedData.students;
+            } else {
+                students = [...defaultStudents];
+            }
+
+            // 출석 데이터 로드
+            await loadAttendanceData();
+
+            render();
+        }
+
+        function updateFolderSelect() {
+            const select = document.getElementById('formLocalFolder');
+            select.innerHTML = '<option value="">선택 안함</option>';
+            folders.forEach(folder => {
+                select.innerHTML += `<option value="${folder}">${folder}</option>`;
+            });
+        }
+
+        function getGradeClass(grade) {
+            const map = {
+                '중1': 'grade-1',
+                '중2': 'grade-2',
+                '중3': 'grade-3',
+                '고1': 'grade-high1',
+                '고2': 'grade-high2',
+                '고3': 'grade-high3',
+                '검정고시': 'grade-etc'
+            };
+            return map[grade] || 'grade-etc';
+        }
+
+        function getGradeOrder(grade) {
+            const order = ['중1', '중2', '중3', '고1', '고2', '고3', '검정고시'];
+            return order.indexOf(grade);
+        }
+
+        function timeToMinutes(time) {
+            const [h, m] = time.split(':').map(Number);
+            return h * 60 + m;
+        }
+
+        // 30분 단위 타임슬롯 생성 (13:00 ~ 20:00)
+        function generateTimeSlots() {
+            const slots = [];
+            for (let h = 13; h <= 20; h++) {
+                slots.push(`${String(h).padStart(2, '0')}:00`);
+                if (h < 20) {
+                    slots.push(`${String(h).padStart(2, '0')}:30`);
+                }
+            }
+            return slots;
+        }
+
+        // 특정 시간대에 수업 중인 학생 조회
+        function getStudentsInTimeSlot(day, slotTime) {
+            const slotMinutes = timeToMinutes(slotTime);
+            const slotEnd = slotMinutes + 30;
+
+            return students.filter(s => {
+                if (s.day !== day) return false;
+                const startMin = timeToMinutes(s.start);
+                const endMin = timeToMinutes(s.end);
+                // 수업 시간과 30분 슬롯이 겹치는지 확인
+                return startMin < slotEnd && endMin > slotMinutes;
+            }).sort((a, b) => getGradeOrder(a.grade) - getGradeOrder(b.grade));
+        }
+
+        // 현재 시간 가져오기
+        function getCurrentTimeSlot() {
+            const now = new Date();
+            const hours = now.getHours();
+            const minutes = now.getMinutes();
+            const slot = minutes < 30 ? '00' : '30';
+            return `${String(hours).padStart(2, '0')}:${slot}`;
+        }
+
+        // 현재 요일 가져오기 (화, 목, 토)
+        function getCurrentDay() {
+            const dayMap = { 2: '화', 4: '목', 6: '토' };
+            return dayMap[new Date().getDay()] || null;
+        }
+
+        // 시간대별 보기 렌더링
+        function renderTimeSlotView() {
+            const timeSlots = generateTimeSlots();
+            const days = ['화', '목', '토'];
+            const currentSlot = getCurrentTimeSlot();
+            const currentDay = getCurrentDay();
+            const now = new Date();
+            const currentTimeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+
+            let html = `<div class="current-time-indicator">현재 시각: ${currentTimeStr}</div>`;
+            html += '<div class="timeslot-container">';
+
+            days.forEach(day => {
+                const isToday = day === currentDay;
+                html += `
+                    <div class="timeslot-day">
+                        <div class="timeslot-day-header day-${day}">${day}요일${isToday ? ' (오늘)' : ''}</div>
+                `;
+
+                timeSlots.forEach(slot => {
+                    const studentsInSlot = getStudentsInTimeSlot(day, slot);
+                    const isCurrent = isToday && slot === currentSlot;
+
+                    html += `
+                        <div class="timeslot-row${isCurrent ? ' current-time' : ''}">
+                            <div class="timeslot-time">${slot}</div>
+                            <div class="timeslot-students">
+                    `;
+
+                    if (studentsInSlot.length > 0) {
+                        studentsInSlot.forEach(s => {
+                            html += `<span class="timeslot-student badge-${s.grade}" title="${s.subject} (${s.start}~${s.end})">${s.name}</span>`;
+                        });
+                    } else {
+                        html += '<span class="timeslot-empty">-</span>';
+                    }
+
+                    html += `
+                            </div>
+                        </div>
+                    `;
+                });
+
+                html += '</div>';
+            });
+
+            html += '</div>';
+            return html;
+        }
+
+        // ===== 실시간 관리 기능 =====
+
+        // 오늘 날짜 문자열 (YYYY-MM-DD)
+        function getTodayDateString() {
+            const now = new Date();
+            return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+        }
+
+        // 현재 시각 문자열 (HH:MM:SS)
+        function getCurrentTimeString() {
+            const now = new Date();
+            return `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
+        }
+
+        // 선택된 요일에 예정된 학생 목록 (체크인 안한 학생만)
+        function getWaitingStudents() {
+            // 선택된 요일이 없으면 오늘 요일로 설정
+            if (!selectedClassDay) {
+                const weekDays = ['일', '월', '화', '수', '목', '금', '토'];
+                selectedClassDay = weekDays[new Date().getDay()];
+            }
+
+            // 선택된 요일에 예정된 학생들 (학생 데이터의 day 필드와 매칭)
+            const dayStudents = students.filter(s => s.day === selectedClassDay);
+
+            // 이미 체크인한 학생 이름 목록
+            const checkedInNames = activeSessions.map(s => s.studentName);
+
+            // 중복 제거 (같은 학생이 여러 시간대에 있을 수 있음)
+            const uniqueStudents = [];
+            const seenNames = new Set();
+
+            for (const student of dayStudents) {
+                if (!seenNames.has(student.name) && !checkedInNames.includes(student.name)) {
+                    seenNames.add(student.name);
+                    uniqueStudents.push(student);
+                }
+            }
+
+            // 예정 시간순 정렬
+            return uniqueStudents.sort((a, b) => timeToMinutes(a.start) - timeToMinutes(b.start));
+        }
+
+        // 요일 변경 핸들러
+        function changeClassDay(day) {
+            selectedClassDay = day;
+            renderRealtimeView();
+        }
+
+        // 학생 체크인
+        function checkInStudent(studentName, grade, scheduledTime = '') {
+            const now = new Date();
+            const checkInTime = now.toISOString();
+            const expectedEndTime = new Date(now.getTime() + 90 * 60 * 1000).toISOString();
+
+            const session = {
+                studentName,
+                grade,
+                scheduledTime,
+                checkInTime,
+                expectedEndTime,
+                status: 'active'
+            };
+
+            activeSessions.push(session);
+            renderRealtimeView();
+            showToast(`${studentName} 학생 수업 시작!`);
+        }
+
+        // 학생 체크아웃
+        async function checkOutStudent(studentName) {
+            const sessionIndex = activeSessions.findIndex(s => s.studentName === studentName);
+            if (sessionIndex === -1) return;
+
+            const session = activeSessions[sessionIndex];
+            const now = new Date();
+            const checkInDate = new Date(session.checkInTime);
+            const duration = Math.round((now - checkInDate) / 60000);  // 분 단위
+
+            // 출석 기록 저장
+            const record = {
+                studentName: session.studentName,
+                grade: session.grade,
+                scheduledTime: session.scheduledTime,
+                checkIn: checkInDate.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' }),
+                checkOut: now.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' }),
+                duration: duration
+            };
+
+            // 오늘 날짜 확인 및 기록 추가
+            const today = getTodayDateString();
+            if (todayAttendance.date !== today) {
+                todayAttendance = { date: today, records: [] };
+            }
+            todayAttendance.records.push(record);
+
+            // 출석 데이터 저장
+            await saveAttendanceData();
+
+            // 세션에서 제거
+            activeSessions.splice(sessionIndex, 1);
+            renderRealtimeView();
+            showToast(`${studentName} 학생 수업 종료! (${duration}분)`);
+        }
+
+        // 시간 연장 (+10분)
+        function extendSession(studentName) {
+            const session = activeSessions.find(s => s.studentName === studentName);
+            if (!session) return;
+
+            const currentEnd = new Date(session.expectedEndTime);
+            session.expectedEndTime = new Date(currentEnd.getTime() + 10 * 60 * 1000).toISOString();
+            session.status = 'active';  // overtime에서 active로 변경
+
+            renderRealtimeView();
+            showToast(`${studentName} 학생 10분 연장!`);
+        }
+
+        // 남은 시간 계산 (초 단위)
+        function getRemainingSeconds(expectedEndTime) {
+            const now = new Date();
+            const end = new Date(expectedEndTime);
+            return Math.floor((end - now) / 1000);
+        }
+
+        // 남은 시간 포맷 (MM:SS 또는 -MM:SS)
+        function formatRemainingTime(seconds) {
+            const absSeconds = Math.abs(seconds);
+            const mins = Math.floor(absSeconds / 60);
+            const secs = absSeconds % 60;
+            const sign = seconds < 0 ? '-' : '';
+            return `${sign}${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+        }
+
+        // 실시간 뷰 렌더링
+        function renderRealtimeView() {
+            const today = getCurrentDay();
+            const now = new Date();
+            const currentTimeStr = getCurrentTimeString().slice(0, 5);
+            const dateStr = `${now.getFullYear()}년 ${now.getMonth() + 1}월 ${now.getDate()}일`;
+            const weekDays = ['일', '월', '화', '수', '목', '금', '토'];
+            const todayWeekDay = weekDays[now.getDay()];
+
+            // 선택된 요일 기본값 설정 (오늘 요일)
+            if (!selectedClassDay) {
+                selectedClassDay = todayWeekDay;
+            }
+
+            const dayNames = { '월': '월요일', '화': '화요일', '수': '수요일', '목': '목요일', '금': '금요일', '토': '토요일', '일': '일요일' };
+
+            const waitingStudents = getWaitingStudents();
+            const completedCount = todayAttendance.date === getTodayDateString() ? todayAttendance.records.length : 0;
+
+            let html = `
+                <div class="realtime-stats">
+                    <div style="flex:1;display:flex;align-items:center;">
+                        <span class="realtime-current-time">${currentTimeStr}</span>
+                        <span class="realtime-current-date">${dateStr} (${todayWeekDay})</span>
+                        <div class="day-selector">
+                            <label>수업 요일:</label>
+                            <select onchange="changeClassDay(this.value)">
+                                <option value="월" ${selectedClassDay === '월' ? 'selected' : ''}>월요일${todayWeekDay === '월' ? ' (오늘)' : ''}</option>
+                                <option value="화" ${selectedClassDay === '화' ? 'selected' : ''}>화요일${todayWeekDay === '화' ? ' (오늘)' : ''}</option>
+                                <option value="수" ${selectedClassDay === '수' ? 'selected' : ''}>수요일${todayWeekDay === '수' ? ' (오늘)' : ''}</option>
+                                <option value="목" ${selectedClassDay === '목' ? 'selected' : ''}>목요일${todayWeekDay === '목' ? ' (오늘)' : ''}</option>
+                                <option value="금" ${selectedClassDay === '금' ? 'selected' : ''}>금요일${todayWeekDay === '금' ? ' (오늘)' : ''}</option>
+                                <option value="토" ${selectedClassDay === '토' ? 'selected' : ''}>토요일${todayWeekDay === '토' ? ' (오늘)' : ''}</option>
+                                <option value="일" ${selectedClassDay === '일' ? 'selected' : ''}>일요일${todayWeekDay === '일' ? ' (오늘)' : ''}</option>
+                            </select>
+                            ${selectedClassDay === todayWeekDay ? '<span class="today-badge">오늘</span>' : '<span style="font-size:12px;color:#e67e22;margin-left:5px;">(미리보기)</span>'}
+                        </div>
+                    </div>
+                    <div class="realtime-stat waiting">
+                        <span class="realtime-stat-value">${waitingStudents.length}</span>
+                        <span class="realtime-stat-label">대기</span>
+                    </div>
+                    <div class="realtime-stat active">
+                        <span class="realtime-stat-value">${activeSessions.length}</span>
+                        <span class="realtime-stat-label">수업중</span>
+                    </div>
+                    <div class="realtime-stat completed">
+                        <span class="realtime-stat-value">${completedCount}</span>
+                        <span class="realtime-stat-label">완료</span>
+                    </div>
+                </div>
+
+                <div class="realtime-container">
+                    <div class="realtime-panel">
+                        <div class="realtime-panel-header waiting">
+                            ${dayNames[selectedClassDay]} 대기 중 (${waitingStudents.length}명)
+                        </div>
+                        <div class="realtime-panel-body">
+            `;
+
+            if (waitingStudents.length === 0) {
+                html += `<div class="no-students-message">${dayNames[selectedClassDay]}에 대기 중인 학생이 없습니다</div>`;
+            } else {
+                for (const student of waitingStudents) {
+                    html += `
+                        <div class="realtime-card grade-${student.grade}" onclick="checkInStudent('${student.name.replace(/'/g, "\\'")}', '${student.grade}', '${student.start}')">
+                            <div class="card-header">
+                                <span class="card-name">${student.name}</span>
+                                <span class="grade-badge badge-${student.grade}">${student.grade}</span>
+                            </div>
+                            <div class="card-time">예정: ${student.start}</div>
+                            <div class="waiting-card-hint">클릭하여 수업 시작</div>
+                        </div>
+                    `;
+                }
+            }
+
+            // 예정 외 학생 추가 버튼
+            html += `
+                        <div class="add-extra-student" onclick="openExtraStudentModal()">
+                            + 예정 외 학생 추가
+                        </div>
+                    </div>
+                </div>
+
+                <div class="realtime-panel">
+                    <div class="realtime-panel-header active">
+                        수업 중 (${activeSessions.length}명)
+                    </div>
+                    <div class="realtime-panel-body">
+            `;
+
+            if (activeSessions.length === 0) {
+                html += '<div class="no-students-message">수업 중인 학생이 없습니다</div>';
+            } else {
+                // 남은 시간 기준 정렬 (적게 남은 순)
+                const sortedSessions = [...activeSessions].sort((a, b) => {
+                    return getRemainingSeconds(a.expectedEndTime) - getRemainingSeconds(b.expectedEndTime);
+                });
+
+                for (const session of sortedSessions) {
+                    const remaining = getRemainingSeconds(session.expectedEndTime);
+                    const isOvertime = remaining < 0;
+                    const isWarning = remaining >= 0 && remaining <= 300;  // 5분 이하
+
+                    const checkInTime = new Date(session.checkInTime).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
+                    const expectedEndTime = new Date(session.expectedEndTime).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
+
+                    let timerClass = '';
+                    let cardClass = 'realtime-card checked-in grade-' + session.grade;
+                    if (isOvertime) {
+                        timerClass = 'overtime';
+                        cardClass += ' overtime-card';
+                    } else if (isWarning) {
+                        timerClass = 'warning';
+                    }
+
+                    html += `
+                        <div class="${cardClass}" data-student-card="${session.studentName}">
+                            <div class="card-header">
+                                <span class="card-name">${session.studentName}</span>
+                                <span class="grade-badge badge-${session.grade}">${session.grade}</span>
+                            </div>
+                            <div class="card-time">
+                                시작: ${checkInTime} → 종료: ${expectedEndTime}
+                                ${session.scheduledTime ? `<span style="color:#888;margin-left:10px;">(예정: ${session.scheduledTime})</span>` : ''}
+                            </div>
+                            <div class="card-timer ${timerClass}" data-student-timer="${session.studentName}">
+                                ${isOvertime ? '⚠️ 종료! ' : ''}${formatRemainingTime(remaining)}
+                            </div>
+                            <div class="card-actions">
+                                <button class="btn btn-extend btn-sm" onclick="extendSession('${session.studentName.replace(/'/g, "\\'")}')">+10분</button>
+                                <button class="btn btn-danger btn-sm" onclick="checkOutStudent('${session.studentName.replace(/'/g, "\\'")}')">체크아웃</button>
+                            </div>
+                        </div>
+                    `;
+                }
+            }
+
+            html += `
+                    </div>
+                </div>
+            </div>
+            `;
+
+            document.getElementById('tableContainer').innerHTML = html;
+        }
+
+        // 실시간 타이머 시작
+        function startRealtimeTimer() {
+            if (realtimeInterval) clearInterval(realtimeInterval);
+            realtimeInterval = setInterval(() => {
+                if (currentView === 'realtime') {
+                    updateRealtimeTimers();  // 전체 재렌더링 대신 타이머만 업데이트
+                }
+            }, 1000);  // 1초마다 업데이트
+        }
+
+        // 타이머 부분만 업데이트 (드롭다운 유지)
+        function updateRealtimeTimers() {
+            // 현재 시각 업데이트
+            const timeEl = document.querySelector('.realtime-current-time');
+            if (timeEl) {
+                timeEl.textContent = getCurrentTimeString().slice(0, 5);
+            }
+
+            // 각 세션의 타이머 업데이트
+            for (const session of activeSessions) {
+                const remaining = getRemainingSeconds(session.expectedEndTime);
+                const isOvertime = remaining < 0;
+                const isWarning = remaining >= 0 && remaining <= 300;
+
+                const timerEl = document.querySelector(`[data-student-timer="${session.studentName}"]`);
+                if (timerEl) {
+                    timerEl.textContent = (isOvertime ? '⚠️ 종료! ' : '') + formatRemainingTime(remaining);
+
+                    // 클래스 업데이트
+                    timerEl.classList.remove('warning', 'overtime');
+                    if (isOvertime) {
+                        timerEl.classList.add('overtime');
+                    } else if (isWarning) {
+                        timerEl.classList.add('warning');
+                    }
+                }
+
+                // 카드 클래스 업데이트
+                const cardEl = document.querySelector(`[data-student-card="${session.studentName}"]`);
+                if (cardEl) {
+                    if (isOvertime && !cardEl.classList.contains('overtime-card')) {
+                        cardEl.classList.add('overtime-card');
+                    }
+                }
+            }
+        }
+
+        // 실시간 타이머 정지
+        function stopRealtimeTimer() {
+            if (realtimeInterval) {
+                clearInterval(realtimeInterval);
+                realtimeInterval = null;
+            }
+        }
+
+        // 예정 외 학생 추가 모달 열기
+        function openExtraStudentModal() {
+            // 이미 체크인된 학생 제외한 전체 학생 목록
+            const checkedInNames = activeSessions.map(s => s.studentName);
+            const availableStudents = [];
+            const seenNames = new Set();
+
+            for (const student of students) {
+                if (!seenNames.has(student.name) && !checkedInNames.includes(student.name)) {
+                    seenNames.add(student.name);
+                    availableStudents.push(student);
+                }
+            }
+
+            // 학년순, 이름순 정렬
+            availableStudents.sort((a, b) => {
+                const gradeDiff = getGradeOrder(a.grade) - getGradeOrder(b.grade);
+                if (gradeDiff !== 0) return gradeDiff;
+                return a.name.localeCompare(b.name, 'ko');
+            });
+
+            let html = '<div style="max-height:400px;overflow-y:auto;">';
+            if (availableStudents.length === 0) {
+                html += '<div class="no-students-message">추가할 수 있는 학생이 없습니다</div>';
+            } else {
+                for (const student of availableStudents) {
+                    html += `
+                        <div class="realtime-card grade-${student.grade}" onclick="selectExtraStudent('${student.name.replace(/'/g, "\\'")}', '${student.grade}')" style="cursor:pointer;">
+                            <div class="card-header">
+                                <span class="card-name">${student.name}</span>
+                                <span class="grade-badge badge-${student.grade}">${student.grade}</span>
+                            </div>
+                        </div>
+                    `;
+                }
+            }
+            html += '</div>';
+
+            document.getElementById('extraStudentList').innerHTML = html;
+            document.getElementById('extraStudentModal').classList.add('show');
+        }
+
+        // 예정 외 학생 선택
+        function selectExtraStudent(name, grade) {
+            closeExtraStudentModal();
+            checkInStudent(name, grade, '');
+        }
+
+        // 예정 외 학생 모달 닫기
+        function closeExtraStudentModal() {
+            document.getElementById('extraStudentModal').classList.remove('show');
+        }
+
+        // 출석 데이터 저장
+        async function saveAttendanceData() {
+            const result = await window.electronAPI.saveAttendance(todayAttendance);
+            if (!result.success) {
+                console.error('출석 저장 실패:', result.error);
+            }
+        }
+
+        // 출석 데이터 로드
+        async function loadAttendanceData() {
+            const today = getTodayDateString();
+            const data = await window.electronAPI.loadAttendance(today);
+            if (data && data.date === today) {
+                todayAttendance = data;
+            } else {
+                todayAttendance = { date: today, records: [] };
+            }
+        }
+
+        // ===== 실시간 관리 기능 끝 =====
+
+        function renderLinks(student) {
+            let html = '';
+
+            if (student.localFolder) {
+                html += `<button class="link-btn folder" onclick="openFolder('${student.localFolder.replace(/'/g, "\\'")}')">📁 자료폴더</button>`;
+            }
+
+            student.driveLinks.forEach((link, i) => {
+                const isFolder = link.includes('/folders/');
+                const label = isFolder ? '📂 Drive' : `📄 ${i+1}`;
+                html += `<button class="link-btn drive" onclick="openExternal('${link}')">${label}</button>`;
+            });
+
+            if (!student.localFolder && student.driveLinks.length === 0 && student.note) {
+                html += '<span style="color:#999;font-size:11px;">교재사용</span>';
+            }
+
+            return html || '-';
+        }
+
+        function renderTable(data) {
+            if (data.length === 0) {
+                return '<div class="no-data">해당 조건의 데이터가 없습니다.</div>';
+            }
+
+            let html = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>이름</th>
+                            <th>학년</th>
+                            <th>요일</th>
+                            <th>시간</th>
+                            <th>비고</th>
+                            <th>과목</th>
+                            <th>자료</th>
+                            <th>관리</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+
+            data.forEach((s, idx) => {
+                const originalIndex = students.indexOf(s);
+                html += `
+                    <tr class="${getGradeClass(s.grade)}">
+                        <td class="student-name">${s.name}</td>
+                        <td><span class="grade-badge badge-${s.grade}">${s.grade}</span></td>
+                        <td class="day-${s.day}">${s.day}</td>
+                        <td class="time">${s.start} ~ ${s.end}</td>
+                        <td class="material-note">${s.note || '-'}</td>
+                        <td><span class="subject-badge">${s.subject || '-'}</span></td>
+                        <td class="links-cell">${renderLinks(s)}</td>
+                        <td class="actions-cell">
+                            <button class="btn btn-primary btn-sm" onclick="openEditModal(${originalIndex})">수정</button>
+                            <button class="btn btn-danger btn-sm" onclick="confirmDelete(${originalIndex})">삭제</button>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            html += '</tbody></table>';
+            return html;
+        }
+
+        function render() {
+            // 실시간 관리 보기
+            if (currentView === 'realtime') {
+                renderRealtimeView();
+                startRealtimeTimer();
+                return;
+            } else {
+                stopRealtimeTimer();
+            }
+
+            // 시간대별 보기는 별도 렌더링
+            if (currentView === 'timeslot') {
+                document.getElementById('tableContainer').innerHTML = renderTimeSlotView();
+                return;
+            }
+
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            let filtered = students.filter(s => s.name.toLowerCase().includes(searchTerm));
+
+            // 요일 필터
+            if (currentDay !== 'all') {
+                filtered = filtered.filter(s => s.day === currentDay);
+            }
+
+            // 학년 필터
+            if (currentGrade !== 'all') {
+                filtered = filtered.filter(s => s.grade === currentGrade);
+            }
+
+            // 정렬
+            if (currentView === 'day') {
+                // 요일별: 요일 → 시간순
+                const dayOrder = ['화', '목', '토'];
+                filtered.sort((a, b) => {
+                    const dayDiff = dayOrder.indexOf(a.day) - dayOrder.indexOf(b.day);
+                    if (dayDiff !== 0) return dayDiff;
+                    return timeToMinutes(a.start) - timeToMinutes(b.start);
+                });
+            } else if (currentView === 'student') {
+                // 학생별: 학년 → 이름 → 요일순
+                filtered.sort((a, b) => {
+                    const gradeDiff = getGradeOrder(a.grade) - getGradeOrder(b.grade);
+                    if (gradeDiff !== 0) return gradeDiff;
+                    const nameDiff = a.name.localeCompare(b.name, 'ko');
+                    if (nameDiff !== 0) return nameDiff;
+                    const dayOrder = ['화', '목', '토'];
+                    return dayOrder.indexOf(a.day) - dayOrder.indexOf(b.day);
+                });
+            } else if (currentView === 'grade') {
+                // 학년별: 학년 → 시간순
+                filtered.sort((a, b) => {
+                    const gradeDiff = getGradeOrder(a.grade) - getGradeOrder(b.grade);
+                    if (gradeDiff !== 0) return gradeDiff;
+                    const dayOrder = ['화', '목', '토'];
+                    const dayDiff = dayOrder.indexOf(a.day) - dayOrder.indexOf(b.day);
+                    if (dayDiff !== 0) return dayDiff;
+                    return timeToMinutes(a.start) - timeToMinutes(b.start);
+                });
+            }
+
+            document.getElementById('tableContainer').innerHTML = renderTable(filtered);
+        }
+
+        // 폴더 열기
+        async function openFolder(folderName) {
+            const result = await window.electronAPI.openFolder(folderName);
+            if (!result.success) {
+                showToast(result.error, true);
+            }
+        }
+
+        // 외부 링크 열기
+        async function openExternal(url) {
+            await window.electronAPI.openExternal(url);
+        }
+
+        // 모달 열기 (추가)
+        function openAddModal() {
+            document.getElementById('modalTitle').textContent = '학생 추가';
+            document.getElementById('editIndex').value = -1;
+            document.getElementById('studentForm').reset();
+            resetDriveLinks();
+            resetPdfList();
+            document.getElementById('studentModal').classList.add('show');
+        }
+
+        // 모달 열기 (수정)
+        function openEditModal(index) {
+            const student = students[index];
+            document.getElementById('modalTitle').textContent = '학생 정보 수정';
+            document.getElementById('editIndex').value = index;
+
+            document.getElementById('formName').value = student.name;
+            document.getElementById('formGrade').value = student.grade;
+            document.getElementById('formDay').value = student.day;
+            document.getElementById('formStart').value = student.start;
+            document.getElementById('formEnd').value = student.end;
+            document.getElementById('formSubject').value = student.subject || '중1수학';
+            document.getElementById('formNote').value = student.note;
+            document.getElementById('formLocalFolder').value = student.localFolder;
+
+            // Drive 링크 설정
+            resetDriveLinks();
+            student.driveLinks.forEach((link, i) => {
+                if (i > 0) addDriveLink();
+                const inputs = document.querySelectorAll('#driveLinksContainer input');
+                inputs[i].value = link;
+            });
+
+            // PDF 목록 로드
+            if (student.localFolder) {
+                loadPdfList(student.localFolder);
+            } else {
+                resetPdfList();
+            }
+
+            document.getElementById('studentModal').classList.add('show');
+        }
+
+        // 모달 닫기
+        function closeModal() {
+            document.getElementById('studentModal').classList.remove('show');
+        }
+
+        // Drive 링크 관리
+        function resetDriveLinks() {
+            document.getElementById('driveLinksContainer').innerHTML = `
+                <div class="drive-link-item">
+                    <input type="url" placeholder="https://drive.google.com/...">
+                    <button type="button" class="btn btn-danger btn-sm" onclick="removeDriveLink(this)">삭제</button>
+                </div>
+            `;
+        }
+
+        function addDriveLink() {
+            const container = document.getElementById('driveLinksContainer');
+            const div = document.createElement('div');
+            div.className = 'drive-link-item';
+            div.innerHTML = `
+                <input type="url" placeholder="https://drive.google.com/...">
+                <button type="button" class="btn btn-danger btn-sm" onclick="removeDriveLink(this)">삭제</button>
+            `;
+            container.appendChild(div);
+        }
+
+        function removeDriveLink(btn) {
+            const container = document.getElementById('driveLinksContainer');
+            if (container.children.length > 1) {
+                btn.parentElement.remove();
+            } else {
+                btn.previousElementSibling.value = '';
+            }
+        }
+
+        // 폼 제출
+        function submitForm(e) {
+            e.preventDefault();
+
+            const index = parseInt(document.getElementById('editIndex').value);
+            const driveInputs = document.querySelectorAll('#driveLinksContainer input');
+            const driveLinks = Array.from(driveInputs).map(i => i.value.trim()).filter(v => v);
+
+            const studentData = {
+                name: document.getElementById('formName').value.trim(),
+                grade: document.getElementById('formGrade').value,
+                day: document.getElementById('formDay').value,
+                start: document.getElementById('formStart').value,
+                end: document.getElementById('formEnd').value,
+                subject: document.getElementById('formSubject').value,
+                note: document.getElementById('formNote').value.trim(),
+                localFolder: document.getElementById('formLocalFolder').value,
+                driveLinks: driveLinks
+            };
+
+            if (index === -1) {
+                students.push(studentData);
+                showToast('학생이 추가되었습니다.');
+            } else {
+                students[index] = studentData;
+                showToast('학생 정보가 수정되었습니다.');
+            }
+
+            closeModal();
+            render();
+        }
+
+        // 삭제 확인
+        function confirmDelete(index) {
+            deleteIndex = index;
+            const student = students[index];
+            document.getElementById('deleteMessage').textContent =
+                `"${student.name}" (${student.day} ${student.start}~${student.end}) 일정을 삭제하시겠습니까?`;
+            document.getElementById('deleteModal').classList.add('show');
+        }
+
+        function closeDeleteModal() {
+            document.getElementById('deleteModal').classList.remove('show');
+            deleteIndex = -1;
+        }
+
+        document.getElementById('confirmDeleteBtn').addEventListener('click', () => {
+            if (deleteIndex !== -1) {
+                students.splice(deleteIndex, 1);
+                showToast('삭제되었습니다.');
+                closeDeleteModal();
+                render();
+            }
+        });
+
+        // PDF 관련 함수들
+        function resetPdfList() {
+            document.getElementById('pdfList').innerHTML = '<div class="no-pdf">폴더를 선택하면 PDF 목록이 표시됩니다</div>';
+        }
+
+        // 현재 선택된 폴더명 저장
+        let currentFolderName = '';
+
+        // 트리 구조 렌더링 함수
+        function renderFileTree(items, folderName, depth = 0) {
+            let html = '';
+
+            for (const item of items) {
+                if (item.type === 'file') {
+                    const escapedPath = item.path.replace(/'/g, "\\'").replace(/\\/g, '\\\\');
+                    html += `
+                        <div class="pdf-item">
+                            <span class="pdf-item-name" title="${item.path}">📄 ${item.name}</span>
+                            <button class="btn btn-primary btn-sm" onclick="openPdf('${folderName.replace(/'/g, "\\'")}', '${escapedPath}')">열기</button>
+                            <button class="btn btn-danger btn-sm" onclick="deletePdf('${folderName.replace(/'/g, "\\'")}', '${escapedPath}')">삭제</button>
+                        </div>
+                    `;
+                } else if (item.type === 'folder') {
+                    const folderId = `folder-${depth}-${item.name.replace(/\s/g, '-')}`;
+                    html += `
+                        <div class="pdf-folder">
+                            <div class="pdf-folder-header" onclick="toggleFolder('${folderId}')">
+                                <span class="folder-icon">▼</span>
+                                📁 ${item.name}
+                                <span style="color:#888;font-size:11px;margin-left:auto;">(${countFiles(item.children)}개)</span>
+                            </div>
+                            <div class="pdf-folder-children" id="${folderId}">
+                                ${renderFileTree(item.children, folderName, depth + 1)}
+                            </div>
+                        </div>
+                    `;
+                }
+            }
+
+            return html;
+        }
+
+        // 폴더 내 파일 수 계산
+        function countFiles(items) {
+            let count = 0;
+            for (const item of items) {
+                if (item.type === 'file') {
+                    count++;
+                } else if (item.type === 'folder') {
+                    count += countFiles(item.children);
+                }
+            }
+            return count;
+        }
+
+        // 폴더 토글
+        function toggleFolder(folderId) {
+            const children = document.getElementById(folderId);
+            const header = children.previousElementSibling;
+            children.classList.toggle('hidden');
+            header.classList.toggle('collapsed');
+        }
+
+        async function loadPdfList(folderName) {
+            const pdfList = document.getElementById('pdfList');
+            currentFolderName = folderName;
+
+            if (!folderName) {
+                pdfList.innerHTML = '<div class="no-pdf">폴더를 선택하면 PDF 목록이 표시됩니다</div>';
+                return;
+            }
+
+            const files = await window.electronAPI.getStudentFiles(folderName);
+
+            if (files.length === 0) {
+                pdfList.innerHTML = '<div class="no-pdf">PDF 파일이 없습니다. 위 버튼으로 추가하세요.</div>';
+                return;
+            }
+
+            const totalCount = countFiles(files);
+            pdfList.innerHTML = `
+                <div style="font-size:12px;color:#666;margin-bottom:8px;">총 ${totalCount}개 파일</div>
+                ${renderFileTree(files, folderName)}
+            `;
+        }
+
+        async function selectAndUploadPdf() {
+            const folderSelect = document.getElementById('formLocalFolder');
+            const studentName = document.getElementById('formName').value.trim();
+            let folderName = folderSelect.value;
+
+            // 폴더가 없으면 학생 이름으로 새 폴더 생성
+            if (!folderName) {
+                if (!studentName) {
+                    showToast('먼저 학생 이름을 입력하세요.', true);
+                    return;
+                }
+                folderName = studentName;
+            }
+
+            // 파일 선택
+            const result = await window.electronAPI.selectPdfFiles();
+            if (!result.success || result.canceled) {
+                return;
+            }
+
+            // 파일 업로드
+            const uploadResult = await window.electronAPI.uploadPdf({
+                filePaths: result.filePaths,
+                studentName: folderName
+            });
+
+            if (uploadResult.success) {
+                showToast(`${uploadResult.copiedFiles.length}개 파일 업로드 완료!`);
+
+                // 폴더 목록 갱신
+                folders = await window.electronAPI.getFolders();
+                updateFolderSelect();
+
+                // 폴더 선택 및 PDF 목록 갱신
+                folderSelect.value = uploadResult.folderName;
+                loadPdfList(uploadResult.folderName);
+            } else {
+                showToast('업로드 실패: ' + uploadResult.error, true);
+            }
+        }
+
+        async function createNewFolder() {
+            const studentName = document.getElementById('formName').value.trim();
+            if (!studentName) {
+                showToast('먼저 학생 이름을 입력하세요.', true);
+                return;
+            }
+
+            // 빈 파일로 폴더 생성 (업로드 시 자동 생성됨)
+            const result = await window.electronAPI.selectPdfFiles();
+            if (!result.success || result.canceled) {
+                return;
+            }
+
+            const uploadResult = await window.electronAPI.uploadPdf({
+                filePaths: result.filePaths,
+                studentName: studentName
+            });
+
+            if (uploadResult.success) {
+                showToast(`"${studentName}" 폴더 생성 및 ${uploadResult.copiedFiles.length}개 파일 업로드!`);
+                folders = await window.electronAPI.getFolders();
+                updateFolderSelect();
+                document.getElementById('formLocalFolder').value = studentName;
+                loadPdfList(studentName);
+            } else {
+                showToast('폴더 생성 실패: ' + uploadResult.error, true);
+            }
+        }
+
+        async function openPdf(folderName, filePath) {
+            const result = await window.electronAPI.openPdf({ folderName, filePath });
+            if (!result.success) {
+                showToast(result.error, true);
+            }
+        }
+
+        async function deletePdf(folderName, filePath) {
+            const fileName = filePath.split(/[/\\]/).pop();
+            if (!confirm(`"${fileName}" 파일을 삭제하시겠습니까?`)) {
+                return;
+            }
+
+            const result = await window.electronAPI.deletePdf({ folderName, filePath });
+            if (result.success) {
+                showToast('파일이 삭제되었습니다.');
+                loadPdfList(folderName);
+            } else {
+                showToast('삭제 실패: ' + result.error, true);
+            }
+        }
+
+        // 폴더 선택 변경 시 PDF 목록 갱신
+        document.getElementById('formLocalFolder').addEventListener('change', (e) => {
+            loadPdfList(e.target.value);
+        });
+
+        // 데이터 저장
+        async function saveAllData() {
+            const result = await window.electronAPI.saveData({ students });
+            if (result.success) {
+                showToast('저장되었습니다!');
+            } else {
+                showToast('저장 실패: ' + result.error, true);
+            }
+        }
+
+        // 토스트 메시지
+        function showToast(message, isError = false) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = 'toast show' + (isError ? ' error' : '');
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+
+        // 탭 이벤트
+        document.querySelectorAll('.view-tabs .tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.view-tabs .tab').forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                currentView = tab.dataset.view;
+                render();
+            });
+        });
+
+        document.querySelectorAll('.day-tabs .tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.day-tabs .tab').forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                currentDay = tab.dataset.day;
+                render();
+            });
+        });
+
+        document.querySelectorAll('.grade-tabs .tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.grade-tabs .tab').forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                currentGrade = tab.dataset.grade;
+                render();
+            });
+        });
+
+        // 앱 초기화
+        init();
+    </script>
+</body>
+</html>
