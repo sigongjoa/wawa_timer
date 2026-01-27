@@ -50,7 +50,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: 수학시간표관리-${{ steps.get_version.outputs.VERSION }}
+          name: MathScheduleManager-${{ steps.get_version.outputs.VERSION }}
           path: electron-app/dist/*.exe
           retention-days: 30
 
