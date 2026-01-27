@@ -1196,12 +1196,27 @@
             folders = await window.electronAPI.getFolders();
             updateFolderSelect();
 
-            // 저장된 데이터 로드
-            const savedData = await window.electronAPI.loadData();
-            if (savedData && savedData.students) {
-                students = savedData.students;
-            } else {
-                students = [...defaultStudents];
+            // Notion에서 학생 데이터 자동 동기화 시도
+            let notionLoaded = false;
+            try {
+                const notionResult = await window.electronAPI.notionGetStudents();
+                if (notionResult.success && notionResult.students.length > 0) {
+                    students = notionResult.students;
+                    notionLoaded = true;
+                    console.log('Notion에서 학생 데이터 로드 완료:', students.length, '명');
+                }
+            } catch (err) {
+                console.log('Notion 연결 실패, 로컬 데이터 사용:', err.message);
+            }
+
+            // Notion 로드 실패 시 로컬 데이터 사용
+            if (!notionLoaded) {
+                const savedData = await window.electronAPI.loadData();
+                if (savedData && savedData.students) {
+                    students = savedData.students;
+                } else {
+                    students = [...defaultStudents];
+                }
             }
 
             // 출석 데이터 로드
