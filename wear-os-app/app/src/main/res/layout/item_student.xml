@@ -5,20 +5,22 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="@color/surface"
-    android:padding="8dp"
+    android:padding="6dp"
     android:layout_marginVertical="2dp">
 
+    <!-- 학생 이름 (학년) -->
     <TextView
         android:id="@+id/nameText"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:textColor="@color/text_primary"
-        android:textSize="14sp"
+        android:textSize="13sp"
         android:textStyle="bold"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintEnd_toStartOf="@id/checkInButton" />
 
+    <!-- 시간 -->
     <TextView
         android:id="@+id/timeText"
         android:layout_width="0dp"
@@ -27,17 +29,62 @@
         android:textSize="10sp"
         app:layout_constraintTop_toBottomOf="@id/nameText"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/checkInButton"
         android:layout_marginTop="2dp" />
 
+    <!-- 타이머 (수업중일 때만 표시) -->
     <TextView
-        android:id="@+id/statusText"
-        android:layout_width="wrap_content"
+        android:id="@+id/timerText"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:textSize="10sp"
-        android:padding="2dp"
+        android:textColor="@color/accent"
+        android:textSize="12sp"
+        android:textStyle="bold"
+        android:visibility="gone"
         app:layout_constraintTop_toBottomOf="@id/timeText"
         app:layout_constraintStart_toStartOf="parent"
-        android:layout_marginTop="4dp" />
+        app:layout_constraintEnd_toStartOf="@id/checkInButton"
+        android:layout_marginTop="2dp" />
+
+    <!-- 입실 버튼 -->
+    <Button
+        android:id="@+id/checkInButton"
+        android:layout_width="48dp"
+        android:layout_height="32dp"
+        android:text="입실"
+        android:textSize="10sp"
+        android:padding="0dp"
+        android:backgroundTint="@color/check_in"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- 퇴실 버튼 -->
+    <Button
+        android:id="@+id/checkOutButton"
+        android:layout_width="48dp"
+        android:layout_height="32dp"
+        android:text="퇴실"
+        android:textSize="10sp"
+        android:padding="0dp"
+        android:visibility="gone"
+        android:backgroundTint="@color/check_out"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- 완료 상태 -->
+    <TextView
+        android:id="@+id/completedText"
+        android:layout_width="48dp"
+        android:layout_height="wrap_content"
+        android:text="완료"
+        android:textSize="10sp"
+        android:textColor="@color/text_secondary"
+        android:gravity="center"
+        android:visibility="gone"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

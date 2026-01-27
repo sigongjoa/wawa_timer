@@ -77,9 +77,9 @@ class NotionClient(
     private fun parseStudent(id: String, properties: JsonObject): Student? {
         try {
             val name = getTitle(properties, "이름") ?: return null
-            val grade = getRichText(properties, "학년") ?: ""
-            val subject = getRichText(properties, "과목") ?: ""
-            val day = getRichText(properties, "요일") ?: ""
+            val grade = getSelect(properties, "학년") ?: ""
+            val subject = getSelect(properties, "과목") ?: ""
+            val day = getSelect(properties, "요일") ?: ""
             val startTimeNum = getNumber(properties, "시작시간")
             val endTime = getRichText(properties, "종료시간") ?: ""
 
@@ -115,6 +115,13 @@ class NotionClient(
             if (richText != null && richText.size() > 0) {
                 richText.get(0).asJsonObject.get("plain_text").asString
             } else null
+        } catch (e: Exception) { null }
+    }
+
+    private fun getSelect(properties: JsonObject, key: String): String? {
+        return try {
+            val selectObj = properties.getAsJsonObject(key)?.getAsJsonObject("select")
+            selectObj?.get("name")?.asString
         } catch (e: Exception) { null }
     }
 
