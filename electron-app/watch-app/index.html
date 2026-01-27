@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#1a1a2e">
+    <title>학원 출석</title>
+    <link rel="manifest" href="manifest.json">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #1a1a2e;
+            color: #eee;
+        }
+
+        .container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            padding: 8px;
+            padding-top: env(safe-area-inset-top, 8px);
+            padding-bottom: env(safe-area-inset-bottom, 8px);
+        }
+
+        /* 헤더 */
+        .header {
+            text-align: center;
+            padding: 4px 0;
+            border-bottom: 1px solid #333;
+            margin-bottom: 8px;
+        }
+
+        .header h1 {
+            font-size: 14px;
+            font-weight: 600;
+            color: #fff;
+        }
+
+        .header .date {
+            font-size: 11px;
+            color: #888;
+            margin-top: 2px;
+        }
+
+        /* 로딩 */
+        .loading {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .spinner {
+            width: 24px;
+            height: 24px;
+            border: 3px solid #333;
+            border-top-color: #4CAF50;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* 설정 화면 */
+        .setup {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+            text-align: center;
+        }
+
+        .setup h2 {
+            font-size: 14px;
+            margin-bottom: 12px;
+        }
+
+        .setup input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #444;
+            border-radius: 8px;
+            background: #2a2a4a;
+            color: #fff;
+            font-size: 11px;
+            margin-bottom: 8px;
+        }
+
+        .setup button {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-radius: 8px;
+            background: #4CAF50;
+            color: #fff;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        /* 학생 목록 */
+        .student-list {
+            flex: 1;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .student-card {
+            background: #2a2a4a;
+            border-radius: 12px;
+            padding: 10px;
+            margin-bottom: 8px;
+            position: relative;
+        }
+
+        .student-card.checked-in {
+            background: #1e3a1e;
+            border-left: 3px solid #4CAF50;
+        }
+
+        .student-card.completed {
+            background: #2a2a3a;
+            opacity: 0.7;
+        }
+
+        .student-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
+        }
+
+        .student-name {
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .student-grade {
+            font-size: 11px;
+            color: #888;
+            background: #333;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+        .student-time {
+            font-size: 11px;
+            color: #aaa;
+            margin-bottom: 8px;
+        }
+
+        .timer {
+            font-size: 20px;
+            font-weight: bold;
+            color: #4CAF50;
+            text-align: center;
+            margin: 8px 0;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.1s;
+        }
+
+        .btn:active {
+            transform: scale(0.95);
+        }
+
+        .btn-checkin {
+            background: #4CAF50;
+            color: #fff;
+        }
+
+        .btn-checkout {
+            background: #f44336;
+            color: #fff;
+        }
+
+        .btn-disabled {
+            background: #555;
+            color: #888;
+        }
+
+        .completed-badge {
+            text-align: center;
+            color: #888;
+            font-size: 11px;
+            padding: 8px;
+        }
+
+        /* 하단 상태 */
+        .footer {
+            text-align: center;
+            padding: 8px 0;
+            border-top: 1px solid #333;
+            margin-top: 8px;
+        }
+
+        .footer .status {
+            font-size: 10px;
+            color: #666;
+        }
+
+        .footer .active-count {
+            font-size: 12px;
+            color: #4CAF50;
+            font-weight: 600;
+        }
+
+        /* 에러 메시지 */
+        .error {
+            background: #4a1a1a;
+            color: #ff6b6b;
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 12px;
+        }
+
+        /* 빈 상태 */
+        .empty {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            color: #666;
+            font-size: 12px;
+        }
+
+        .empty-icon {
+            font-size: 32px;
+            margin-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>학원 출석</h1>
+            <div class="date" id="todayDate"></div>
+        </div>
+
+        <div id="content">
+            <div class="loading">
+                <div class="spinner"></div>
+                <span style="font-size:11px;color:#888;">로딩중...</span>
+            </div>
+        </div>
+
+        <div class="footer">
+            <div class="active-count" id="activeCount">수업중: 0명</div>
+            <div class="status" id="syncStatus">동기화 대기</div>
+        </div>
+    </div>
+
+    <script>
+        // Notion 설정
+        const NOTION_API_KEY = localStorage.getItem('notionApiKey') || '';
+        const STUDENTS_DB_ID = localStorage.getItem('studentsDbId') || '';
+        const ATTENDANCE_DB_ID = localStorage.getItem('attendanceDbId') || '';
+
+        // CORS 프록시 (Notion API는 브라우저에서 직접 호출 불가)
+        const CORS_PROXY = 'https://corsproxy.io/?';
+
+        // 상태
+        let students = [];
+        let todayAttendance = {};
+        let timers = {};
+
+        // 오늘 요일 (화/목/토)
+        const dayMap = ['일', '월', '화', '수', '목', '금', '토'];
+        const today = new Date();
+        const todayDay = dayMap[today.getDay()];
+        const todayStr = today.toISOString().split('T')[0];
+
+        // 초기화
+        document.getElementById('todayDate').textContent =
+            `${today.getMonth()+1}/${today.getDate()} (${todayDay})`;
+
+        // 설정 확인
+        if (!NOTION_API_KEY || !STUDENTS_DB_ID) {
+            showSetup();
+        } else {
+            loadData();
+        }
+
+        // 설정 화면
+        function showSetup() {
+            document.getElementById('content').innerHTML = `
+                <div class="setup">
+                    <h2>Notion 설정</h2>
+                    <input type="text" id="apiKeyInput" placeholder="Notion API 키" value="${NOTION_API_KEY}">
+                    <input type="text" id="studentsDbInput" placeholder="학생 DB ID" value="${STUDENTS_DB_ID}">
+                    <input type="text" id="attendanceDbInput" placeholder="출석 DB ID" value="${ATTENDANCE_DB_ID}">
+                    <button onclick="saveSettings()">저장</button>
+                </div>
+            `;
+        }
+
+        function saveSettings() {
+            const apiKey = document.getElementById('apiKeyInput').value.trim();
+            const studentsDb = document.getElementById('studentsDbInput').value.trim();
+            const attendanceDb = document.getElementById('attendanceDbInput').value.trim();
+
+            if (!apiKey || !studentsDb) {
+                alert('API 키와 학생 DB ID는 필수입니다');
+                return;
+            }
+
+            localStorage.setItem('notionApiKey', apiKey);
+            localStorage.setItem('studentsDbId', studentsDb);
+            localStorage.setItem('attendanceDbId', attendanceDb);
+
+            location.reload();
+        }
+
+        // 데이터 로드
+        async function loadData() {
+            try {
+                updateStatus('학생 로딩중...');
+
+                // Notion에서 학생 목록 가져오기
+                const response = await fetch(CORS_PROXY + 'https://api.notion.com/v1/databases/' + STUDENTS_DB_ID + '/query', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': 'Bearer ' + NOTION_API_KEY,
+                        'Notion-Version': '2022-06-28',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({})
+                });
+
+                if (!response.ok) {
+                    throw new Error('Notion API 오류: ' + response.status);
+                }
+
+                const data = await response.json();
+                students = data.results.map(parseStudent).filter(s => s.day.includes(todayDay));
+
+                // 시작시간 기준 정렬
+                students.sort((a, b) => a.startNum - b.startNum);
+
+                renderStudents();
+                updateStatus('동기화 완료');
+            } catch (error) {
+                console.error('로드 오류:', error);
+                document.getElementById('content').innerHTML = `
+                    <div class="error">
+                        연결 오류<br>
+                        <small>${error.message}</small><br>
+                        <button onclick="showSetup()" style="margin-top:8px;padding:6px 12px;border:none;border-radius:4px;background:#444;color:#fff;">설정</button>
+                    </div>
+                `;
+            }
+        }
+
+        // 학생 데이터 파싱
+        function parseStudent(page) {
+            const props = page.properties;
+            const startNum = getProperty(props['시작시간']) || 0;
+            const startTime = numberToTime(startNum);
+            const endTime = getProperty(props['종료시간']) || '';
+
+            return {
+                id: page.id,
+                name: getProperty(props['이름']) || '',
+                grade: getProperty(props['학년']) || '',
+                day: getProperty(props['요일']) || '',
+                start: startTime,
+                end: endTime,
+                startNum: startNum,
+                note: getProperty(props['비고']) || '',
+                checkedIn: false,
+                checkInTime: null,
+                checkedOut: false,
+                checkOutTime: null
+            };
+        }
+
+        function getProperty(prop) {
+            if (!prop) return '';
+            switch (prop.type) {
+                case 'title':
+                    return prop.title[0]?.plain_text || '';
+                case 'rich_text':
+                    return prop.rich_text[0]?.plain_text || '';
+                case 'select':
+                    return prop.select?.name || '';
+                case 'number':
+                    return prop.number || 0;
+                default:
+                    return '';
+            }
+        }
+
+        function numberToTime(num) {
+            if (!num) return '';
+            const hours = Math.floor(num / 100);
+            const mins = num % 100;
+            return `${hours.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}`;
+        }
+
+        // 학생 목록 렌더링
+        function renderStudents() {
+            if (students.length === 0) {
+                document.getElementById('content').innerHTML = `
+                    <div class="empty">
+                        <div class="empty-icon">📚</div>
+                        <div>오늘(${todayDay}) 수업이 없습니다</div>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '<div class="student-list">';
+
+            students.forEach(student => {
+                let cardClass = 'student-card';
+                let buttonHtml = '';
+                let timerHtml = '';
+
+                if (student.checkedOut) {
+                    cardClass += ' completed';
+                    const duration = Math.floor((student.checkOutTime - student.checkInTime) / 60000);
+                    buttonHtml = `<div class="completed-badge">✓ ${duration}분 수업완료</div>`;
+                } else if (student.checkedIn) {
+                    cardClass += ' checked-in';
+                    timerHtml = `<div class="timer" id="timer-${student.id}">00:00:00</div>`;
+                    buttonHtml = `<button class="btn btn-checkout" onclick="checkout('${student.id}')">체크아웃</button>`;
+                    startTimer(student);
+                } else {
+                    buttonHtml = `<button class="btn btn-checkin" onclick="checkin('${student.id}')">체크인</button>`;
+                }
+
+                html += `
+                    <div class="${cardClass}" id="card-${student.id}">
+                        <div class="student-info">
+                            <span class="student-name">${student.name}</span>
+                            <span class="student-grade">${student.grade}</span>
+                        </div>
+                        <div class="student-time">${student.start} - ${student.end}</div>
+                        ${timerHtml}
+                        ${buttonHtml}
+                    </div>
+                `;
+            });
+
+            html += '</div>';
+            document.getElementById('content').innerHTML = html;
+
+            updateActiveCount();
+        }
+
+        // 체크인
+        function checkin(studentId) {
+            const student = students.find(s => s.id === studentId);
+            if (!student) return;
+
+            student.checkedIn = true;
+            student.checkInTime = Date.now();
+
+            renderStudents();
+            saveAttendance(student, 'checkin');
+        }
+
+        // 체크아웃
+        function checkout(studentId) {
+            const student = students.find(s => s.id === studentId);
+            if (!student) return;
+
+            student.checkedOut = true;
+            student.checkOutTime = Date.now();
+
+            if (timers[studentId]) {
+                clearInterval(timers[studentId]);
+                delete timers[studentId];
+            }
+
+            renderStudents();
+            saveAttendance(student, 'checkout');
+        }
+
+        // 타이머 시작
+        function startTimer(student) {
+            if (timers[student.id]) return;
+
+            timers[student.id] = setInterval(() => {
+                const elapsed = Date.now() - student.checkInTime;
+                const hours = Math.floor(elapsed / 3600000);
+                const mins = Math.floor((elapsed % 3600000) / 60000);
+                const secs = Math.floor((elapsed % 60000) / 1000);
+
+                const timerEl = document.getElementById(`timer-${student.id}`);
+                if (timerEl) {
+                    timerEl.textContent =
+                        `${hours.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+                }
+            }, 1000);
+        }
+
+        // 출석 저장 (Notion)
+        async function saveAttendance(student, action) {
+            if (!ATTENDANCE_DB_ID) {
+                console.log('출석 DB ID 없음, 로컬만 저장');
+                return;
+            }
+
+            try {
+                const now = new Date();
+                const timeStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+
+                if (action === 'checkout') {
+                    const duration = Math.floor((student.checkOutTime - student.checkInTime) / 60000);
+                    const checkInTime = new Date(student.checkInTime);
+                    const checkInStr = `${checkInTime.getHours().toString().padStart(2, '0')}:${checkInTime.getMinutes().toString().padStart(2, '0')}`;
+
+                    await fetch(CORS_PROXY + 'https://api.notion.com/v1/pages', {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': 'Bearer ' + NOTION_API_KEY,
+                            'Notion-Version': '2022-06-28',
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            parent: { database_id: ATTENDANCE_DB_ID },
+                            properties: {
+                                '이름': { title: [{ text: { content: student.name } }] },
+                                '학년': { select: { name: student.grade } },
+                                '날짜': { date: { start: todayStr } },
+                                '체크인': { rich_text: [{ text: { content: checkInStr } }] },
+                                '체크아웃': { rich_text: [{ text: { content: timeStr } }] },
+                                '수업시간': { number: duration },
+                                '예정시간': { rich_text: [{ text: { content: `${student.start}-${student.end}` } }] }
+                            }
+                        })
+                    });
+
+                    updateStatus('출석 저장됨');
+                }
+            } catch (error) {
+                console.error('출석 저장 오류:', error);
+                updateStatus('저장 오류');
+            }
+        }
+
+        // 활성 학생 수 업데이트
+        function updateActiveCount() {
+            const active = students.filter(s => s.checkedIn && !s.checkedOut).length;
+            document.getElementById('activeCount').textContent = `수업중: ${active}명`;
+        }
+
+        // 상태 업데이트
+        function updateStatus(text) {
+            document.getElementById('syncStatus').textContent = text;
+        }
+
+        // Service Worker 등록
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js').catch(console.error);
+        }
+    </script>
+</body>
+</html>
