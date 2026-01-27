@@ -510,6 +510,13 @@ async function syncPdfMetadataToNotion(studentName, files) {
 }
 
 // 모듈 내보내기
+// 설정 리로드 (설정 창에서 저장 후 호출)
+function reloadConfig() {
+    config = null;
+    notion = null;
+    return initNotion();
+}
+
 module.exports = {
     initNotion,
     saveConfig,
@@ -528,4 +535,6 @@ module.exports = {
     updatePdfInNotion,
     deletePdfFromNotion,
     syncPdfMetadataToNotion,
+    // 설정 리로드
+    reloadConfig,
 };

@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>설정 - 수학시간표관리</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #5a67d8 0%, #7c3aed 100%);
+            color: white;
+            padding: 24px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            margin-bottom: 8px;
+        }
+
+        .header .version {
+            font-size: 14px;
+            opacity: 0.8;
+        }
+
+        .content {
+            padding: 24px;
+        }
+
+        .section {
+            margin-bottom: 28px;
+        }
+
+        .section-title {
+            font-size: 16px;
+            font-weight: bold;
+            color: #374151;
+            margin-bottom: 16px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #e5e7eb;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .section-title .icon {
+            font-size: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 14px;
+            color: #6b7280;
+            margin-bottom: 6px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px 14px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #7c3aed;
+            box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+        }
+
+        .form-group input::placeholder {
+            color: #9ca3af;
+        }
+
+        .form-group .hint {
+            font-size: 12px;
+            color: #9ca3af;
+            margin-top: 4px;
+        }
+
+        .radio-group {
+            display: flex;
+            gap: 16px;
+            margin-top: 8px;
+        }
+
+        .radio-option {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+        }
+
+        .radio-option input[type="radio"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .btn-row {
+            display: flex;
+            gap: 12px;
+            margin-top: 8px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #7c3aed 0%, #5a67d8 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
+        }
+
+        .btn-secondary {
+            background: #f3f4f6;
+            color: #374151;
+        }
+
+        .btn-secondary:hover {
+            background: #e5e7eb;
+        }
+
+        .btn-success {
+            background: #10b981;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #059669;
+        }
+
+        .status {
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-size: 13px;
+            margin-top: 12px;
+            display: none;
+        }
+
+        .status.success {
+            display: block;
+            background: #d1fae5;
+            color: #065f46;
+            border: 1px solid #a7f3d0;
+        }
+
+        .status.error {
+            display: block;
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
+        }
+
+        .status.info {
+            display: block;
+            background: #dbeafe;
+            color: #1e40af;
+            border: 1px solid #bfdbfe;
+        }
+
+        .footer {
+            padding: 20px 24px;
+            background: #f9fafb;
+            border-top: 1px solid #e5e7eb;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .footer .btn-save {
+            padding: 12px 32px;
+            font-size: 16px;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid #fff;
+            border-top-color: transparent;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-right: 8px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .db-ids {
+            background: #f9fafb;
+            padding: 16px;
+            border-radius: 8px;
+            margin-top: 12px;
+        }
+
+        .db-ids .form-group {
+            margin-bottom: 12px;
+        }
+
+        .db-ids .form-group:last-child {
+            margin-bottom: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>설정</h1>
+            <div class="version" id="appVersion">버전 로딩 중...</div>
+        </div>
+
+        <div class="content">
+            <!-- Notion 설정 -->
+            <div class="section">
+                <div class="section-title">
+                    <span class="icon">📝</span>
+                    Notion 연동 설정
+                </div>
+
+                <div class="form-group">
+                    <label for="notionApiKey">Notion API 키</label>
+                    <input type="password" id="notionApiKey" placeholder="ntn_xxxxx...">
+                    <div class="hint">Notion Integrations에서 발급받은 Internal Integration Token</div>
+                </div>
+
+                <div class="db-ids">
+                    <div class="form-group">
+                        <label for="dbStudents">학생 데이터베이스 ID</label>
+                        <input type="text" id="dbStudents" placeholder="32자리 데이터베이스 ID">
+                    </div>
+                    <div class="form-group">
+                        <label for="dbAttendance">출석 데이터베이스 ID</label>
+                        <input type="text" id="dbAttendance" placeholder="32자리 데이터베이스 ID">
+                    </div>
+                    <div class="form-group">
+                        <label for="dbPdfs">PDF 데이터베이스 ID</label>
+                        <input type="text" id="dbPdfs" placeholder="32자리 데이터베이스 ID">
+                    </div>
+                </div>
+
+                <div class="btn-row">
+                    <button class="btn btn-secondary" onclick="testNotion()">연결 테스트</button>
+                </div>
+                <div class="status" id="notionStatus"></div>
+            </div>
+
+            <!-- AI 설정 -->
+            <div class="section">
+                <div class="section-title">
+                    <span class="icon">🤖</span>
+                    AI 비서 설정
+                </div>
+
+                <div class="form-group">
+                    <label>AI 제공자 선택</label>
+                    <div class="radio-group">
+                        <label class="radio-option">
+                            <input type="radio" name="aiProvider" value="anthropic" checked>
+                            Claude (Anthropic)
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="aiProvider" value="openai">
+                            GPT (OpenAI)
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="aiProvider" value="google">
+                            Gemini (Google)
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="anthropicKey">Anthropic API 키</label>
+                    <input type="password" id="anthropicKey" placeholder="sk-ant-xxxxx...">
+                </div>
+
+                <div class="form-group">
+                    <label for="openaiKey">OpenAI API 키</label>
+                    <input type="password" id="openaiKey" placeholder="sk-xxxxx...">
+                </div>
+
+                <div class="form-group">
+                    <label for="googleKey">Google AI API 키</label>
+                    <input type="password" id="googleKey" placeholder="AIza...">
+                </div>
+
+                <div class="btn-row">
+                    <button class="btn btn-secondary" onclick="testAI()">AI 연결 테스트</button>
+                </div>
+                <div class="status" id="aiStatus"></div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <button class="btn btn-secondary" onclick="window.close()">취소</button>
+            <button class="btn btn-primary btn-save" onclick="saveSettings()">저장</button>
+        </div>
+    </div>
+
+    <script>
+        // 설정 로드
+        async function loadSettings() {
+            try {
+                // 버전 표시
+                const version = await window.settingsAPI.getVersion();
+                document.getElementById('appVersion').textContent = `버전 ${version}`;
+
+                // Notion 설정 로드
+                const notionConfig = await window.settingsAPI.getNotionConfig();
+                if (notionConfig) {
+                    document.getElementById('notionApiKey').value = notionConfig.apiKey || '';
+                    if (notionConfig.databases) {
+                        document.getElementById('dbStudents').value = notionConfig.databases.students || '';
+                        document.getElementById('dbAttendance').value = notionConfig.databases.attendance || '';
+                        document.getElementById('dbPdfs').value = notionConfig.databases.pdfs || '';
+                    }
+                }
+
+                // AI 설정 로드
+                const aiConfig = await window.settingsAPI.getAIConfig();
+                if (aiConfig) {
+                    const provider = aiConfig.provider || 'anthropic';
+                    document.querySelector(`input[name="aiProvider"][value="${provider}"]`).checked = true;
+                    document.getElementById('anthropicKey').value = aiConfig.anthropicKey || '';
+                    document.getElementById('openaiKey').value = aiConfig.openaiKey || '';
+                    document.getElementById('googleKey').value = aiConfig.googleKey || '';
+                }
+            } catch (err) {
+                console.error('설정 로드 실패:', err);
+            }
+        }
+
+        // Notion 연결 테스트
+        async function testNotion() {
+            const statusEl = document.getElementById('notionStatus');
+            statusEl.className = 'status info';
+            statusEl.textContent = '연결 테스트 중...';
+
+            try {
+                const config = {
+                    apiKey: document.getElementById('notionApiKey').value,
+                    databases: {
+                        students: document.getElementById('dbStudents').value,
+                        attendance: document.getElementById('dbAttendance').value,
+                        pdfs: document.getElementById('dbPdfs').value
+                    }
+                };
+
+                const result = await window.settingsAPI.testNotion(config);
+                if (result.success) {
+                    statusEl.className = 'status success';
+                    statusEl.textContent = '연결 성공! Notion 데이터베이스에 접근할 수 있습니다.';
+                } else {
+                    statusEl.className = 'status error';
+                    statusEl.textContent = '연결 실패: ' + result.error;
+                }
+            } catch (err) {
+                statusEl.className = 'status error';
+                statusEl.textContent = '테스트 실패: ' + err.message;
+            }
+        }
+
+        // AI 연결 테스트
+        async function testAI() {
+            const statusEl = document.getElementById('aiStatus');
+            statusEl.className = 'status info';
+            statusEl.textContent = 'AI 연결 테스트 중...';
+
+            try {
+                const provider = document.querySelector('input[name="aiProvider"]:checked').value;
+                const config = {
+                    provider,
+                    anthropicKey: document.getElementById('anthropicKey').value,
+                    openaiKey: document.getElementById('openaiKey').value,
+                    googleKey: document.getElementById('googleKey').value
+                };
+
+                const result = await window.settingsAPI.testAI(config);
+                if (result.success) {
+                    statusEl.className = 'status success';
+                    statusEl.textContent = `AI 연결 성공! (${provider})`;
+                } else {
+                    statusEl.className = 'status error';
+                    statusEl.textContent = '연결 실패: ' + result.error;
+                }
+            } catch (err) {
+                statusEl.className = 'status error';
+                statusEl.textContent = '테스트 실패: ' + err.message;
+            }
+        }
+
+        // 설정 저장
+        async function saveSettings() {
+            const statusEl = document.getElementById('notionStatus');
+
+            try {
+                // Notion 설정 저장
+                const notionConfig = {
+                    apiKey: document.getElementById('notionApiKey').value,
+                    databases: {
+                        students: document.getElementById('dbStudents').value,
+                        attendance: document.getElementById('dbAttendance').value,
+                        pdfs: document.getElementById('dbPdfs').value
+                    }
+                };
+                await window.settingsAPI.saveNotionConfig(notionConfig);
+
+                // AI 설정 저장
+                const aiConfig = {
+                    provider: document.querySelector('input[name="aiProvider"]:checked').value,
+                    anthropicKey: document.getElementById('anthropicKey').value,
+                    openaiKey: document.getElementById('openaiKey').value,
+                    googleKey: document.getElementById('googleKey').value
+                };
+                await window.settingsAPI.saveAIConfig(aiConfig);
+
+                statusEl.className = 'status success';
+                statusEl.textContent = '설정이 저장되었습니다!';
+
+                setTimeout(() => {
+                    window.close();
+                }, 1000);
+            } catch (err) {
+                statusEl.className = 'status error';
+                statusEl.textContent = '저장 실패: ' + err.message;
+            }
+        }
+
+        // 페이지 로드 시 설정 불러오기
+        document.addEventListener('DOMContentLoaded', loadSettings);
+    </script>
+</body>
+</html>

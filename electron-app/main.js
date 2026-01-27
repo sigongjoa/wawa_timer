@@ -441,3 +441,187 @@ ipcMain.handle('ai-clear-history', async () => {
 ipcMain.handle('ai-get-history', async () => {
     return { success: true, history: ai.getHistory() };
 });
+
+// ===== 설정 창 관련 =====
+
+let settingsWindow = null;
+
+// 설정 창 열기
+ipcMain.handle('open-settings', async () => {
+    if (settingsWindow) {
+        settingsWindow.focus();
+        return { success: true };
+    }
+
+    settingsWindow = new BrowserWindow({
+        width: 650,
+        height: 750,
+        parent: mainWindow,
+        modal: true,
+        resizable: false,
+        webPreferences: {
+            preload: path.join(__dirname, 'settings-preload.js'),
+            contextIsolation: true,
+            nodeIntegration: false
+        },
+        title: '설정'
+    });
+
+    settingsWindow.loadFile('settings.html');
+    settingsWindow.setMenu(null);
+
+    settingsWindow.on('closed', () => {
+        settingsWindow = null;
+    });
+
+    return { success: true };
+});
+
+// 앱 버전 가져오기
+ipcMain.handle('settings:getVersion', async () => {
+    const packageJson = require('./package.json');
+    return packageJson.version;
+});
+
+// Notion 설정 경로 (exe 기준)
+function getNotionConfigPath() {
+    if (app.isPackaged) {
+        const exeDir = path.dirname(app.getPath('exe'));
+        return path.join(exeDir, 'notion-config.json');
+    }
+    return path.join(__dirname, 'notion-config.json');
+}
+
+// AI 설정 경로 (exe 기준)
+function getAIConfigPath() {
+    if (app.isPackaged) {
+        const exeDir = path.dirname(app.getPath('exe'));
+        return path.join(exeDir, 'ai-config.json');
+    }
+    return path.join(__dirname, 'ai-config.json');
+}
+
+// 설정: Notion 설정 가져오기
+ipcMain.handle('settings:getNotionConfig', async () => {
+    const configPath = getNotionConfigPath();
+    try {
+        if (fs.existsSync(configPath)) {
+            const data = fs.readFileSync(configPath, 'utf-8');
+            return JSON.parse(data);
+        }
+    } catch (err) {
+        console.error('Notion 설정 로드 오류:', err);
+    }
+    return null;
+});
+
+// 설정: Notion 설정 저장
+ipcMain.handle('settings:saveNotionConfig', async (event, config) => {
+    const configPath = getNotionConfigPath();
+    try {
+        fs.writeFileSync(configPath, JSON.stringify(config, null, 2), 'utf-8');
+        // notion 모듈에 설정 반영
+        notion.reloadConfig && notion.reloadConfig();
+        return { success: true };
+    } catch (err) {
+        console.error('Notion 설정 저장 오류:', err);
+        return { success: false, error: err.message };
+    }
+});
+
+// 설정: Notion 연결 테스트
+ipcMain.handle('settings:testNotion', async (event, config) => {
+    try {
+        const { Client } = require('@notionhq/client');
+        const client = new Client({ auth: config.apiKey });
+
+        // 학생 DB에 접근 시도
+        await client.databases.retrieve({ database_id: config.databases.students });
+        return { success: true };
+    } catch (err) {
+        return { success: false, error: err.message };
+    }
+});
+
+// 설정: AI 설정 가져오기
+ipcMain.handle('settings:getAIConfig', async () => {
+    const configPath = getAIConfigPath();
+    try {
+        if (fs.existsSync(configPath)) {
+            const data = fs.readFileSync(configPath, 'utf-8');
+            return JSON.parse(data);
+        }
+    } catch (err) {
+        console.error('AI 설정 로드 오류:', err);
+    }
+    return null;
+});
+
+// 설정: AI 설정 저장
+ipcMain.handle('settings:saveAIConfig', async (event, config) => {
+    const configPath = getAIConfigPath();
+    try {
+        fs.writeFileSync(configPath, JSON.stringify(config, null, 2), 'utf-8');
+
+        // .env 파일도 업데이트 (포터블 모드용)
+        const envPath = app.isPackaged
+            ? path.join(path.dirname(app.getPath('exe')), '.env')
+            : path.join(__dirname, '.env');
+
+        const envContent = `AI_PROVIDER=${config.provider}
+ANTHROPIC_API_KEY=${config.anthropicKey || ''}
+OPENAI_API_KEY=${config.openaiKey || ''}
+GOOGLE_API_KEY=${config.googleKey || ''}
+`;
+        fs.writeFileSync(envPath, envContent, 'utf-8');
+
+        // 환경변수 다시 로드
+        require('dotenv').config({ path: envPath, override: true });
+
+        return { success: true };
+    } catch (err) {
+        console.error('AI 설정 저장 오류:', err);
+        return { success: false, error: err.message };
+    }
+});
+
+// 설정: AI 연결 테스트
+ipcMain.handle('settings:testAI', async (event, config) => {
+    try {
+        if (config.provider === 'anthropic' && config.anthropicKey) {
+            const Anthropic = require('@anthropic-ai/sdk');
+            const client = new Anthropic({ apiKey: config.anthropicKey });
+            await client.messages.create({
+                model: 'claude-3-5-haiku-20241022',
+                max_tokens: 10,
+                messages: [{ role: 'user', content: 'Hi' }]
+            });
+            return { success: true };
+        } else if (config.provider === 'openai' && config.openaiKey) {
+            const OpenAI = require('openai');
+            const client = new OpenAI({ apiKey: config.openaiKey });
+            await client.chat.completions.create({
+                model: 'gpt-4o-mini',
+                max_tokens: 10,
+                messages: [{ role: 'user', content: 'Hi' }]
+            });
+            return { success: true };
+        } else if (config.provider === 'google' && config.googleKey) {
+            const { GoogleGenerativeAI } = require('@google/generative-ai');
+            const genAI = new GoogleGenerativeAI(config.googleKey);
+            const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+            await model.generateContent('Hi');
+            return { success: true };
+        } else {
+            return { success: false, error: '선택한 AI 제공자의 API 키가 필요합니다' };
+        }
+    } catch (err) {
+        return { success: false, error: err.message };
+    }
+});
+
+// 앱 버전 가져오기 (렌더러용)
+ipcMain.handle('get-app-version', async () => {
+    const packageJson = require('./package.json');
+    return packageJson.version;
+});

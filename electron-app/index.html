@@ -802,6 +802,7 @@
             <button class="btn btn-primary" onclick="saveAllData()">💾 저장</button>
             <button class="btn" onclick="openNotionSettingsModal()" id="notionBtn" style="background:#444;color:white;">☁️ Notion</button>
             <button class="btn" onclick="openAiChat()" id="aiBtn" style="background:#8e44ad;color:white;">🤖 AI 비서</button>
+            <button class="btn" onclick="openSettings()" style="background:#6c757d;color:white;">⚙️ 설정</button>
         </div>
     </div>
 
@@ -2629,10 +2630,25 @@
 
         // ===== AI 비서 기능 끝 =====
 
+        // 설정 창 열기
+        async function openSettings() {
+            await window.electronAPI.openSettings();
+        }
+
+        // 앱 버전 표시
+        async function showVersion() {
+            const version = await window.electronAPI.getAppVersion();
+            document.getElementById('appVersion').textContent = `v${version}`;
+        }
+
         // 앱 초기화
         init();
         initNotion();
         initAi();
+        showVersion();
     </script>
+
+    <!-- 버전 표시 -->
+    <div id="appVersion" style="position:fixed;bottom:10px;right:15px;font-size:11px;color:#aaa;z-index:1;"></div>
 </body>
 </html>

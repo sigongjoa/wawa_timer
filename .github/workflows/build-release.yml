@@ -1,0 +1,78 @@
+name: Build and Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version tag (e.g., v1.0.0)'
+        required: false
+        default: 'manual-build'
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    defaults:
+      run:
+        working-directory: electron-app
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: electron-app/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci || npm install
+
+      - name: Build portable EXE
+        run: npm run build:portable
+
+      - name: Get version from tag
+        id: get_version
+        shell: bash
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            echo "VERSION=${{ github.event.inputs.version }}" >> $GITHUB_OUTPUT
+          else
+            echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: 수학시간표관리-${{ steps.get_version.outputs.VERSION }}
+          path: electron-app/dist/*.exe
+          retention-days: 30
+
+      - name: Create Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          name: 수학시간표관리 ${{ steps.get_version.outputs.VERSION }}
+          body: |
+            ## 수학시간표관리 ${{ steps.get_version.outputs.VERSION }}
+
+            ### 다운로드
+            아래 `수학시간표관리.exe` 파일을 다운로드하세요.
+
+            ### 설치 방법
+            1. EXE 파일을 원하는 폴더에 저장
+            2. 실행 후 설정 버튼(⚙️)을 클릭하여 API 키 설정
+            3. Notion 연결 테스트 후 사용 시작
+
+            ### 변경사항
+            - 자세한 변경사항은 커밋 내역을 확인하세요
+          files: electron-app/dist/*.exe
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

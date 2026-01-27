@@ -44,5 +44,9 @@ contextBridge.exposeInMainWorld('electronAPI', {
     aiChat: (data) => ipcRenderer.invoke('ai-chat', data),
     aiAnalyzePdf: (data) => ipcRenderer.invoke('ai-analyze-pdf', data),
     aiClearHistory: () => ipcRenderer.invoke('ai-clear-history'),
-    aiGetHistory: () => ipcRenderer.invoke('ai-get-history')
+    aiGetHistory: () => ipcRenderer.invoke('ai-get-history'),
+
+    // 설정 관련
+    openSettings: () => ipcRenderer.invoke('open-settings'),
+    getAppVersion: () => ipcRenderer.invoke('get-app-version')
 });
