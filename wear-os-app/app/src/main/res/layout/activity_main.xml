@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/background"
+    android:padding="4dp">
+
+    <TextView
+        android:id="@+id/titleText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="요일 선택"
+        android:textColor="@color/text_primary"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="8dp" />
+
+    <HorizontalScrollView
+        android:id="@+id/dayScrollView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:scrollbars="none"
+        app:layout_constraintTop_toBottomOf="@id/titleText"
+        android:layout_marginTop="8dp">
+
+        <LinearLayout
+            android:id="@+id/dayButtonContainer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center">
+
+            <Button
+                android:id="@+id/btnMon"
+                android:layout_width="44dp"
+                android:layout_height="36dp"
+                android:text="월"
+                android:textSize="12sp"
+                android:padding="0dp"
+                android:layout_margin="2dp"
+                android:backgroundTint="@color/surface" />
+
+            <Button
+                android:id="@+id/btnTue"
+                android:layout_width="44dp"
+                android:layout_height="36dp"
+                android:text="화"
+                android:textSize="12sp"
+                android:padding="0dp"
+                android:layout_margin="2dp"
+                android:backgroundTint="@color/surface" />
+
+            <Button
+                android:id="@+id/btnWed"
+                android:layout_width="44dp"
+                android:layout_height="36dp"
+                android:text="수"
+                android:textSize="12sp"
+                android:padding="0dp"
+                android:layout_margin="2dp"
+                android:backgroundTint="@color/surface" />
+
+            <Button
+                android:id="@+id/btnThu"
+                android:layout_width="44dp"
+                android:layout_height="36dp"
+                android:text="목"
+                android:textSize="12sp"
+                android:padding="0dp"
+                android:layout_margin="2dp"
+                android:backgroundTint="@color/surface" />
+
+            <Button
+                android:id="@+id/btnFri"
+                android:layout_width="44dp"
+                android:layout_height="36dp"
+                android:text="금"
+                android:textSize="12sp"
+                android:padding="0dp"
+                android:layout_margin="2dp"
+                android:backgroundTint="@color/surface" />
+
+            <Button
+                android:id="@+id/btnSat"
+                android:layout_width="44dp"
+                android:layout_height="36dp"
+                android:text="토"
+                android:textSize="12sp"
+                android:padding="0dp"
+                android:layout_margin="2dp"
+                android:backgroundTint="@color/surface" />
+
+            <Button
+                android:id="@+id/btnSun"
+                android:layout_width="44dp"
+                android:layout_height="36dp"
+                android:text="일"
+                android:textSize="12sp"
+                android:padding="0dp"
+                android:layout_margin="2dp"
+                android:backgroundTint="@color/surface" />
+
+        </LinearLayout>
+    </HorizontalScrollView>
+
+    <Button
+        android:id="@+id/settingsButton"
+        android:layout_width="wrap_content"
+        android:layout_height="32dp"
+        android:text="설정"
+        android:textSize="10sp"
+        android:backgroundTint="@color/surface"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginBottom="4dp" />
+
+    <TextView
+        android:id="@+id/statusText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@color/text_secondary"
+        android:textSize="10sp"
+        app:layout_constraintBottom_toTopOf="@id/settingsButton"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginBottom="4dp" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
