@@ -140,17 +140,18 @@ async function getStudentsFromNotion() {
 
         const students = response.results.map(page => {
             const props = page.properties;
+            const startNum = getPropertyValue(props['시작시간'] || props['Start'] || props['start']);
             return {
                 notionId: page.id,
                 name: getPropertyValue(props['이름'] || props['Name'] || props['name']),
                 grade: getPropertyValue(props['학년'] || props['Grade'] || props['grade']),
                 day: getPropertyValue(props['요일'] || props['Day'] || props['day']),
-                start: getPropertyValue(props['시작시간'] || props['Start'] || props['start']),
+                start: numberToTime(startNum),
                 end: getPropertyValue(props['종료시간'] || props['End'] || props['end']),
                 subject: getPropertyValue(props['과목'] || props['Subject'] || props['subject']),
                 note: getPropertyValue(props['비고'] || props['Note'] || props['note']),
-                localFolder: getPropertyValue(props['로컬폴더'] || props['LocalFolder'] || props['localFolder']),
-                driveLinks: getPropertyValue(props['드라이브링크'] || props['DriveLinks'] || props['driveLinks']) || [],
+                localFolder: '',
+                driveLinks: [],
             };
         });
 
@@ -329,18 +330,36 @@ function getPropertyValue(property) {
     }
 }
 
+// 시간 문자열을 숫자로 변환 (예: "15:00" → 1500, "15:30" → 1530)
+function timeToNumber(timeStr) {
+    if (!timeStr) return 0;
+    if (typeof timeStr === 'number') return timeStr;
+    const parts = timeStr.split(':');
+    if (parts.length === 2) {
+        return parseInt(parts[0]) * 100 + parseInt(parts[1]);
+    }
+    return parseInt(timeStr) || 0;
+}
+
+// 숫자를 시간 문자열로 변환 (예: 1500 → "15:00", 1530 → "15:30")
+function numberToTime(num) {
+    if (!num) return '';
+    if (typeof num === 'string') return num;
+    const hours = Math.floor(num / 100);
+    const mins = num % 100;
+    return `${hours.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}`;
+}
+
 // 학생 데이터 -> Notion 속성 변환
 function buildStudentProperties(student) {
     return {
         '이름': { title: [{ text: { content: student.name } }] },
         '학년': { select: { name: student.grade } },
         '요일': { select: { name: student.day } },
-        '시작시간': { rich_text: [{ text: { content: student.start } }] },
-        '종료시간': { rich_text: [{ text: { content: student.end } }] },
+        '시작시간': { number: timeToNumber(student.start) },
+        '종료시간': { rich_text: [{ text: { content: student.end || '' } }] },
         '과목': { select: { name: student.subject } },
         '비고': { rich_text: [{ text: { content: student.note || '' } }] },
-        '로컬폴더': { rich_text: [{ text: { content: student.localFolder || '' } }] },
-        '드라이브링크': { rich_text: [{ text: { content: (student.driveLinks || []).join('\n') } }] },
     };
 }
 
