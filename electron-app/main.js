@@ -112,17 +112,28 @@ ipcMain.handle('save-data', async (event, data) => {
     }
 });
 
-// 폴더 열기
-ipcMain.handle('open-folder', async (event, folderName) => {
+// 폴더 열기 (드라이브 링크 또는 로컬 폴더)
+ipcMain.handle('open-folder', async (event, folderNameOrUrl) => {
+    // URL인 경우 외부 브라우저로 열기
+    if (folderNameOrUrl && (folderNameOrUrl.startsWith('http://') || folderNameOrUrl.startsWith('https://'))) {
+        try {
+            await shell.openExternal(folderNameOrUrl);
+            return { success: true };
+        } catch (error) {
+            return { success: false, error: error.message };
+        }
+    }
+
+    // 로컬 폴더인 경우 (개발 모드용)
     const assetsPath = getAssetsPath();
-    const folderPath = path.join(assetsPath, folderName);
+    const folderPath = path.join(assetsPath, folderNameOrUrl);
 
     try {
         if (fs.existsSync(folderPath)) {
             shell.openPath(folderPath);
             return { success: true };
         } else {
-            return { success: false, error: '폴더를 찾을 수 없습니다: ' + folderPath };
+            return { success: false, error: '드라이브 링크를 설정해주세요. (학생 정보 수정에서 설정 가능)' };
         }
     } catch (error) {
         return { success: false, error: error.message };
@@ -144,14 +155,14 @@ ipcMain.handle('get-assets-path', async () => {
     return getAssetsPath();
 });
 
-// 폴더 목록 가져오기
+// 폴더 목록 가져오기 (로컬 폴더가 없으면 빈 배열)
 ipcMain.handle('get-folders', async () => {
     const assetsPath = getAssetsPath();
 
     try {
-        // 폴더가 없으면 생성
         if (!fs.existsSync(assetsPath)) {
-            fs.mkdirSync(assetsPath, { recursive: true });
+            // 폴더가 없으면 빈 배열 반환 (오류 없이)
+            return [];
         }
         const items = fs.readdirSync(assetsPath, { withFileTypes: true });
         return items.filter(item => item.isDirectory()).map(item => item.name);

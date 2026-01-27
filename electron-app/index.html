@@ -1749,17 +1749,19 @@
         function renderLinks(student) {
             let html = '';
 
-            if (student.localFolder) {
-                html += `<button class="link-btn folder" onclick="openFolder('${student.localFolder.replace(/'/g, "\\'")}')">📁 자료폴더</button>`;
-            }
-
+            // 드라이브 링크 우선 표시
             student.driveLinks.forEach((link, i) => {
                 const isFolder = link.includes('/folders/');
-                const label = isFolder ? '📂 Drive' : `📄 ${i+1}`;
+                const label = isFolder ? '📂 Drive' : `📄 자료${i+1}`;
                 html += `<button class="link-btn drive" onclick="openExternal('${link}')">${label}</button>`;
             });
 
-            if (!student.localFolder && student.driveLinks.length === 0 && student.note) {
+            // 드라이브 링크가 없고 로컬 폴더가 있는 경우 (개발 모드용)
+            if (student.driveLinks.length === 0 && student.localFolder) {
+                html += `<button class="link-btn folder" onclick="openFolder('${student.localFolder.replace(/'/g, "\\'")}')">📁 자료폴더</button>`;
+            }
+
+            if (student.driveLinks.length === 0 && !student.localFolder && student.note) {
                 html += '<span style="color:#999;font-size:11px;">교재사용</span>';
             }
 
