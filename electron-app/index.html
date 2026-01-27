@@ -1771,13 +1771,18 @@
                 html += `<button class="link-btn drive" onclick="openExternal('${link}')">${label}</button>`;
             });
 
-            // 드라이브 링크가 없고 로컬 폴더가 있는 경우 (개발 모드용)
-            if (student.driveLinks.length === 0 && student.localFolder) {
-                html += `<button class="link-btn folder" onclick="openFolder('${student.localFolder.replace(/'/g, "\\'")}')">📁 자료폴더</button>`;
-            }
-
-            if (student.driveLinks.length === 0 && !student.localFolder && student.note) {
-                html += '<span style="color:#999;font-size:11px;">교재사용</span>';
+            // 드라이브 링크가 없는 경우 Notion 페이지로 업로드 안내
+            if (student.driveLinks.length === 0) {
+                if (student.notionId) {
+                    // Notion 페이지로 이동 (파일 첨부 가능)
+                    const notionUrl = 'https://notion.so/' + student.notionId.replace(/-/g, '');
+                    html += `<button class="link-btn" style="background:#444;color:white;" onclick="openExternal('${notionUrl}')">📤 교재업로드</button>`;
+                } else if (student.localFolder) {
+                    // 개발 모드용 로컬 폴더
+                    html += `<button class="link-btn folder" onclick="openFolder('${student.localFolder.replace(/'/g, "\\'")}')">📁 자료폴더</button>`;
+                } else {
+                    html += `<button class="link-btn" style="background:#e74c3c;color:white;" onclick="showToast('학생 정보를 먼저 Notion에 동기화해주세요', true)">❌ 자료없음</button>`;
+                }
             }
 
             return html || '-';
