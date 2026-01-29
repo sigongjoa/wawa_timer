@@ -48,5 +48,11 @@ contextBridge.exposeInMainWorld('electronAPI', {
 
     // 설정 관련
     openSettings: () => ipcRenderer.invoke('open-settings'),
-    getAppVersion: () => ipcRenderer.invoke('get-app-version')
+    getAppVersion: () => ipcRenderer.invoke('get-app-version'),
+
+    // P5S 워치 알림
+    watchTest: () => ipcRenderer.invoke('watch-test'),
+    watchWarning: (studentName) => ipcRenderer.invoke('watch-warning', studentName),
+    watchOvertime: (studentName) => ipcRenderer.invoke('watch-overtime', studentName),
+    watchNotify: (message) => ipcRenderer.invoke('watch-notify', message)
 });

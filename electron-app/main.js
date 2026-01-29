@@ -636,3 +636,141 @@ ipcMain.handle('get-app-version', async () => {
     const packageJson = require('./package.json');
     return packageJson.version;
 });
+
+// ===== P5S 워치 알림 =====
+const watchNotifier = require('./watch-notifier');
+
+// 워치 테스트 알림
+ipcMain.handle('watch-test', async () => {
+    return await watchNotifier.testNotification();
+});
+
+// 워치 경고 알림 (5분 전)
+ipcMain.handle('watch-warning', async (event, studentName) => {
+    return await watchNotifier.notifyWarning(studentName);
+});
+
+// 워치 종료 알림
+ipcMain.handle('watch-overtime', async (event, studentName) => {
+    return await watchNotifier.notifyOvertime(studentName);
+});
+
+// 워치 커스텀 알림
+ipcMain.handle('watch-notify', async (event, message) => {
+    return await watchNotifier.sendNotification(message);
+});
+
+// ===== 워치 설정 (settings 창) =====
+
+// 워치 설정 경로
+function getWatchConfigPath() {
+    if (app.isPackaged) {
+        const exeDir = path.dirname(app.getPath('exe'));
+        return path.join(exeDir, 'watch-config.json');
+    }
+    return path.join(__dirname, 'watch-config.json');
+}
+
+// 워치 설정 가져오기
+ipcMain.handle('settings:getWatchConfig', async () => {
+    const configPath = getWatchConfigPath();
+    try {
+        if (fs.existsSync(configPath)) {
+            const data = fs.readFileSync(configPath, 'utf-8');
+            return JSON.parse(data);
+        }
+    } catch (err) {
+        console.error('워치 설정 로드 오류:', err);
+    }
+    return { enabled: false, macAddress: '', warningMinutes: 5 };
+});
+
+// 워치 설정 저장
+ipcMain.handle('settings:saveWatchConfig', async (event, config) => {
+    const configPath = getWatchConfigPath();
+    try {
+        fs.writeFileSync(configPath, JSON.stringify(config, null, 2), 'utf-8');
+        // watchNotifier에 설정 반영
+        watchNotifier.updateConfig(config);
+        return { success: true };
+    } catch (err) {
+        console.error('워치 설정 저장 오류:', err);
+        return { success: false, error: err.message };
+    }
+});
+
+// 워치 검색 (BLE 스캔)
+ipcMain.handle('settings:scanWatch', async () => {
+    const { spawn } = require('child_process');
+
+    return new Promise((resolve) => {
+        const pythonScript = `
+import asyncio
+from bleak import BleakScanner
+
+async def scan():
+    devices = await BleakScanner.discover(timeout=10.0)
+    # 모든 기기 출력 (이름 있는 것 우선)
+    named = [(d.address, d.name) for d in devices if d.name]
+    unnamed = [(d.address, '') for d in devices if not d.name]
+
+    for addr, name in named + unnamed:
+        print(f"{addr}|{name}")
+
+asyncio.run(scan())
+`;
+
+        const python = spawn('python', ['-c', pythonScript], { timeout: 15000 });
+
+        let output = '';
+        python.stdout.on('data', (data) => { output += data.toString(); });
+        python.stderr.on('data', (data) => { console.error('scan stderr:', data.toString()); });
+
+        python.on('close', () => {
+            const devices = output.trim().split('\\n')
+                .filter(line => line.includes('|'))
+                .map(line => {
+                    const [address, name] = line.split('|');
+                    return { address, name: name || '(이름 없음)' };
+                });
+            resolve({ success: true, devices });
+        });
+
+        python.on('error', (err) => {
+            resolve({ success: false, error: err.message });
+        });
+    });
+});
+
+// 워치 연결 테스트
+ipcMain.handle('settings:testWatch', async (event, macAddress) => {
+    const { spawn } = require('child_process');
+
+    return new Promise((resolve) => {
+        // watch-send.py 파일 실행
+        const scriptPath = path.join(__dirname, 'watch-send.py');
+
+        const python = spawn('python', [
+            scriptPath,
+            macAddress,
+            '연결 테스트!'
+        ], { timeout: 20000 });
+
+        let output = '';
+        let error = '';
+        python.stdout.on('data', (data) => { output += data.toString(); });
+        python.stderr.on('data', (data) => { error += data.toString(); });
+
+        python.on('close', () => {
+            if (output.includes('OK')) {
+                resolve({ success: true });
+            } else {
+                resolve({ success: false, error: error || output || '연결 실패' });
+            }
+        });
+
+        python.on('error', (err) => {
+            resolve({ success: false, error: err.message });
+        });
+    });
+});

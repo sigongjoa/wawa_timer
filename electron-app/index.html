@@ -1190,6 +1190,33 @@
         let todayAttendance = { date: '', records: [] };  // 오늘 출석 기록
         let selectedClassDay = null;  // 선택된 수업 요일 (화/목/토)
 
+        // P5S 워치 알림 설정
+        window.watchNotifyEnabled = false;
+
+        // 워치 알림 토글
+        function toggleWatchNotify() {
+            window.watchNotifyEnabled = !window.watchNotifyEnabled;
+            if (window.watchNotifyEnabled) {
+                showToast('⌚ 워치 알림 활성화');
+                // 테스트 알림 전송 (실제 형식으로)
+                window.electronAPI?.watchNotify('테스트학생 5분 전!');
+            } else {
+                showToast('🔕 워치 알림 비활성화');
+            }
+            renderRealtimeView();
+        }
+
+        // 워치 테스트 알림
+        async function testWatchNotify() {
+            showToast('워치로 테스트 알림 전송 중...');
+            const result = await window.electronAPI?.watchTest();
+            if (result?.success) {
+                showToast('✅ 워치 알림 전송 성공!');
+            } else {
+                showToast('❌ 워치 연결 실패: ' + (result?.error || ''));
+            }
+        }
+
         // 초기화
         async function init() {
             // 폴더 목록 로드
@@ -1534,6 +1561,10 @@
                         <span class="realtime-stat-value">${completedCount}</span>
                         <span class="realtime-stat-label">완료</span>
                     </div>
+                    <div class="realtime-stat watch-notify" onclick="toggleWatchNotify()" style="cursor:pointer;" title="P5S 워치 알림">
+                        <span class="realtime-stat-value">${window.watchNotifyEnabled ? '⌚' : '🔕'}</span>
+                        <span class="realtime-stat-label">${window.watchNotifyEnabled ? '워치ON' : '워치OFF'}</span>
+                    </div>
                 </div>
 
                 <div class="realtime-container">
@@ -1674,6 +1705,22 @@
                 if (cardEl) {
                     if (isOvertime && !cardEl.classList.contains('overtime-card')) {
                         cardEl.classList.add('overtime-card');
+                    }
+                }
+
+                // P5S 워치 알림 (watchNotifyEnabled가 true일 때만)
+                if (window.watchNotifyEnabled) {
+                    // 5분 전 경고 (한 번만)
+                    if (isWarning && !session.watchWarningNotified) {
+                        session.watchWarningNotified = true;
+                        window.electronAPI?.watchWarning(session.studentName);
+                        console.log(`[Watch] ${session.studentName} 5분 전 알림 전송`);
+                    }
+                    // 종료 알림 (한 번만)
+                    if (isOvertime && !session.watchOvertimeNotified) {
+                        session.watchOvertimeNotified = true;
+                        window.electronAPI?.watchOvertime(session.studentName);
+                        console.log(`[Watch] ${session.studentName} 종료 알림 전송`);
                     }
                 }
             }

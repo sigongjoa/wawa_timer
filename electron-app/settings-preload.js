@@ -12,5 +12,11 @@ contextBridge.exposeInMainWorld('settingsAPI', {
     // AI 설정
     getAIConfig: () => ipcRenderer.invoke('settings:getAIConfig'),
     saveAIConfig: (config) => ipcRenderer.invoke('settings:saveAIConfig', config),
-    testAI: (config) => ipcRenderer.invoke('settings:testAI', config)
+    testAI: (config) => ipcRenderer.invoke('settings:testAI', config),
+
+    // 워치 설정
+    getWatchConfig: () => ipcRenderer.invoke('settings:getWatchConfig'),
+    saveWatchConfig: (config) => ipcRenderer.invoke('settings:saveWatchConfig', config),
+    scanWatch: () => ipcRenderer.invoke('settings:scanWatch'),
+    testWatch: (macAddress) => ipcRenderer.invoke('settings:testWatch', macAddress)
 });
