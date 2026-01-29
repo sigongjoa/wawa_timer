@@ -4,7 +4,7 @@ P5S 워치 알림 전송 스크립트
 """
 import sys
 import asyncio
-from bleak import BleakClient
+from bleak import BleakClient, BleakScanner
 
 SERVICE_UUID = "000001ff-3c17-d293-8e48-14fe2e4da212"
 WRITE_CHAR = "0000ff02-0000-1000-8000-00805f9b34fb"
@@ -78,7 +78,13 @@ def build_packet(message: str, notify_type: int = 255) -> list:
 async def send_notification(mac_address: str, message: str):
     """알림 전송"""
     try:
-        async with BleakClient(mac_address) as client:
+        # Windows에서 BLE Random 주소 직접 연결 불가 - 스캔 필요
+        device = await BleakScanner.find_device_by_address(mac_address, timeout=10.0)
+        if not device:
+            print(f"ERROR: Device {mac_address} not found in scan")
+            return
+
+        async with BleakClient(device) as client:
             # Notify 구독
             await client.start_notify(NOTIFY_CHAR, notification_handler)
 
