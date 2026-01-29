@@ -356,6 +356,13 @@
                     <div class="hint">P5S 워치의 Bluetooth MAC 주소 (BLE 스캔으로 확인)</div>
                 </div>
 
+                <div class="form-group" id="deviceListGroup" style="display:none;">
+                    <label>발견된 기기 목록</label>
+                    <select id="deviceList" size="6" style="width:100%; font-family:monospace; padding:5px;">
+                    </select>
+                    <div class="hint">기기를 클릭하면 MAC 주소가 자동 입력됩니다</div>
+                </div>
+
                 <div class="form-group">
                     <label for="watchWarningMin">경고 알림 (분 전)</label>
                     <input type="number" id="watchWarningMin" value="5" min="1" max="30" style="width:100px;">
@@ -480,29 +487,44 @@
         // 워치 검색
         async function scanWatch() {
             const statusEl = document.getElementById('watchStatus');
+            const deviceListGroup = document.getElementById('deviceListGroup');
+            const deviceList = document.getElementById('deviceList');
+
             statusEl.className = 'status info';
             statusEl.textContent = '워치 검색 중... (10초)';
+            deviceListGroup.style.display = 'none';
 
             try {
                 const result = await window.settingsAPI.scanWatch();
                 if (result.success && result.devices && result.devices.length > 0) {
                     statusEl.className = 'status success';
-                    let msg = '발견된 기기:\n';
+                    statusEl.textContent = `${result.devices.length}개 기기 발견! 아래에서 워치를 선택하세요.`;
+
+                    // 기기 목록 표시
+                    deviceList.innerHTML = '';
                     for (const d of result.devices) {
-                        msg += `• ${d.name || '(이름 없음)'} - ${d.address}\n`;
+                        const option = document.createElement('option');
+                        option.value = d.address;
+                        option.textContent = `${d.name || '(이름 없음)'} - ${d.address}`;
+                        deviceList.appendChild(option);
                     }
-                    statusEl.innerHTML = msg.replace(/\n/g, '<br>');
-                    // 첫 번째 기기 자동 입력
-                    if (result.devices[0]) {
-                        document.getElementById('watchMac').value = result.devices[0].address;
-                    }
+                    deviceListGroup.style.display = 'block';
+
+                    // 기기 선택 시 MAC 주소 자동 입력
+                    deviceList.onchange = function() {
+                        document.getElementById('watchMac').value = this.value;
+                        statusEl.className = 'status info';
+                        statusEl.textContent = `선택됨: ${this.value}`;
+                    };
                 } else {
                     statusEl.className = 'status error';
-                    statusEl.textContent = '워치를 찾을 수 없습니다. 워치가 켜져있는지 확인하세요.';
+                    statusEl.textContent = '기기를 찾을 수 없습니다. 워치가 켜져있고 Bluetooth가 활성화되어있는지 확인하세요.';
+                    deviceListGroup.style.display = 'none';
                 }
             } catch (err) {
                 statusEl.className = 'status error';
                 statusEl.textContent = '검색 실패: ' + err.message;
+                deviceListGroup.style.display = 'none';
             }
         }
 
