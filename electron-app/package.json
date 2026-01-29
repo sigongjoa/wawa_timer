@@ -1,6 +1,6 @@
 {
   "name": "math-schedule-manager",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "알파시티점 수학 시간표 관리 프로그램",
   "main": "main.js",
   "scripts": {
